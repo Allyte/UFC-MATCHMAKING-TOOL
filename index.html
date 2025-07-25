@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UFC Matchmaking Tool</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      background-color: #111; 
+      color: #fff; 
+      padding: 20px; 
+      margin: 0;
+    }
+    .container { 
+      max-width: 800px; 
+      margin: 0 auto; 
+      height: 100vh;
+      overflow-y: auto;
+    }
+    select, input, button { 
+      margin: 10px 0; 
+      padding: 8px; 
+      width: 100%; 
+      box-sizing: border-box;
+    }
+    .poster { 
+      border: 2px solid #444; 
+      padding: 15px; 
+      margin-top: 20px; 
+      background-color: #222; 
+      min-height: 200px;
+    }
+    .fight { 
+      margin: 10px 0; 
+      padding: 10px; 
+      border-bottom: 1px solid #555; 
+    }
+    .rank-tag { 
+      color: gold; 
+      font-weight: bold; 
+      margin-right: 6px; 
+    }
+    #division {
+      margin-bottom: 20px;
+    }
+    .event-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #d10a11;
+      text-align: center;
+    }
+    .fighter-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+    .fighter-name {
+      font-weight: bold;
+    }
+    .fighter-record {
+      color: #aaa;
+      font-size: 0.9em;
+    }
+    .vs {
+      text-align: center;
+      margin: 5px 0;
+      font-weight: bold;
+      color: #d10a11;
+    }
+    .division-name {
+      font-size: 0.8em;
+      color: #888;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>UFC Matchmaking Tool</h1>
+    
+    <label for="eventName">Event Name:</label>
+    <input type="text" id="eventName" placeholder="Enter event name (e.g. UFC 300)">
+
+    <label for="eventLocation">Location / Venue:</label>
+    <input type="text" id="eventLocation" placeholder="Enter location (e.g. T-Mobile Arena)">
+
+    <label for="eventTime">Event Date & Time:</label>
+    <input type="datetime-local" id="eventTime">
+
+    <label for="division">Select Division:</label>
+    <select id="division">
+      <option value="HW">Heavyweight</option>
+      <option value="LHW">Light Heavyweight</option>
+      <option value="MW">Middleweight</option>
+      <option value="WW">Welterweight</option>
+      <option value="LW">Lightweight</option>
+      <option value="FW">Featherweight</option>
+      <option value="BW">Bantamweight</option>
+      <option value="FLW">Flyweight</option>
+    </select>
+
+    <label for="fighter1">Select Fighter 1:</label>
+    <select id="fighter1"></select>
+    <input type="text" id="custom1" placeholder="Or type unranked Fighter 1" />
+    <input type="text" id="record1" placeholder="Fighter 1 record (e.g. 10-2)" />
+
+    <label for="fighter2">Select Fighter 2:</label>
+    <select id="fighter2"></select>
+    <input type="text" id="custom2" placeholder="Or type unranked Fighter 2" />
+    <input type="text" id="record2" placeholder="Fighter 2 record (e.g. 12-3)" />
+
+    <button onclick="addFight()">Add to Poster</button>
+    <button onclick="clearPoster()" style="background-color: #444; color: white;">Clear Poster</button>
+
+    <div class="poster" id="poster">
+      <h2>Event Matchmaking</h2>
+    </div>
+  </div>
+
+<script>
+const roster = {
+  HW: [
+    { rank: "C", name: "Tom Aspinall", record: "15-3" },
+    { rank: "1", name: "Ciryl Gane", record: "13-2" },
+    { rank: "2", name: "Alexander Volkov", record: "38-11" },
+    { rank: "3", name: "Sergei Pavlovich", record: "19-3" },
+    { rank: "4", name: "Curtis Blaydes", record: "19-5 (1 NC)" },
+    { rank: "5", name: "Jailton Almeida", record: "22-3" },
+    { rank: "6", name: "Waldo Cortes-Acosta", record: "14-1" },
+    { rank: "7", name: "Marcin Tybura", record: "27-9" },
+    { rank: "8", name: "Serghei Spivac", record: "17-6" },
+    { rank: "9", name: "Derrick Lewis", record: "29-12 (1 NC)" },
+    { rank: "10", name: "Tai Tuivasa", record: "14-8" },
+    { rank: "11", name: "Shamil Gaziev", record: "14-1" },
+    { rank: "12", name: "Mick Parkin", record: "10-1" },
+    { rank: "13", name: "Martin Buday", record: "15-2" },
+    { rank: "14", name: "Tallison Teixeira", record: "8-1" },
+    { rank: "15", name: "Rizvan Kuniev", record: "12-3-1 (1 NC)" }
+  ],
+  LHW: [
+    { rank: "C", name: "Magomed Ankalaev", record: "20-1-1 (1 NC)" },
+    { rank: "1", name: "Alex Pereira", record: "12-3" },
+    { rank: "2", name: "Jiří Procházka", record: "31-5-1" },
+    { rank: "3", name: "Carlos Ulberg", record: "12-1" },
+    { rank: "4", name: "Khalil Rountree Jr.", record: "14-6 (1 NC)" },
+    { rank: "5", name: "Jan Błachowicz", record: "29-11-1" },
+    { rank: "6", name: "Jamahal Hill", record: "12-4 (1 NC)" },
+    { rank: "7", name: "Aleksandar Rakić", record: "14-5" },
+    { rank: "8", name: "Dominick Reyes", record: "15-4" },
+    { rank: "9", name: "Volkan Oezdemir", record: "20-8" },
+    { rank: "10", name: "Nikita Krylov", record: "30-10" },
+    { rank: "11", name: "Azamat Murzakanov", record: "15-0" },
+    { rank: "12", name: "Johnny Walker", record: "21-9 (1 NC)" },
+    { rank: "13", name: "Bogdan Guskov", record: "17-3" },
+    { rank: "14", name: "Zhang Mingyang", record: "19-6" },
+    { rank: "15", name: "Alonzo Menifield", record: "17-5-1" }
+  ],
+  MW: [
+    { rank: "C", name: "Dricus du Plessis", record: "23-2" },
+    { rank: "1", name: "Nassourdine Imavov", record: "16-4 (1 NC)" },
+    { rank: "2", name: "Sean Strickland", record: "29-7" },
+    { rank: "3", name: "Khamzat Chimaev", record: "14-0" },
+    { rank: "4", name: "Israel Adesanya", record: "24-5" },
+    { rank: "5", name: "Robert Whittaker", record: "26-8" },
+    { rank: "6", name: "Caio Borralho", record: "17-1 (1 NC)" },
+    { rank: "7", name: "Jared Cannonier", record: "18-8" },
+    { rank: "8", name: "Roman Dolidze", record: "15-3" },
+    { rank: "9", name: "Anthony Hernandez", record: "14-2 (1 NC)" },
+    { rank: "10", name: "Brendan Allen", record: "25-7" },
+    { rank: "11", name: "Paulo Costa", record: "15-4" },
+    { rank: "12", name: "Marvin Vettori", record: "19-9-1" },
+    { rank: "13", name: "Reinier de Ridder", record: "20-2" },
+    { rank: "14", name: "Abusupiyan Magomedov", record: "28-6-1" },
+    { rank: "15", name: "Roman Kopylov", record: "14-4" }
+  ],
+  WW: [
+    { rank: "C", name: "Jack Della Maddalena", record: "18-2" },
+    { rank: "1", name: "Belal Muhammad", record: "24-4 (1 NC)" },
+    { rank: "2", name: "Sean Brady", record: "18-1" },
+    { rank: "3", name: "Shavkat Rakhmonov", record: "19-0" },
+    { rank: "4", name: "Leon Edwards", record: "22-5 (1 NC)" },
+    { rank: "5", name: "Kamaru Usman", record: "21-4" },
+    { rank: "6", name: "Ian Machado Garry", record: "16-1" },
+    { rank: "7", name: "Michael Morales", record: "18-0" },
+    { rank: "8", name: "Joaquin Buckley", record: "21-7" },
+    { rank: "9", name: "Colby Covington", record: "17-5" },
+    { rank: "10", name: "Geoff Neal", record: "16-6" },
+    { rank: "11", name: "Gilbert Burns", record: "22-9" },
+    { rank: "12", name: "Carlos Prates", record: "21-7" },
+    { rank: "13", name: "Gabriel Bonfim", record: "18-1" },
+    { rank: "14", name: "Daniel Rodriguez", record: "20-5" },
+    { rank: "15", name: "Michael Page", record: "23-3" }
+  ],
+  LW: [
+  { rank: "C", name: "Ilia Topuria", record: "17-0" },
+  { rank: "1", name: "Islam Makhachev", record: "27-1" },
+  { rank: "2", name: "Arman Tsarukyan", record: "22-3" },
+  { rank: "3", name: "Charles Oliveira", record: "35-11 (1 NC)" },
+  { rank: "4", name: "Max Holloway", record: "27-8" },
+  { rank: "5", name: "Justin Gaethje", record: "26-5" },
+  { rank: "6", name: "Dan Hooker", record: "24-12" },
+  { rank: "7", name: "Mateusz Gamrot", record: "25-3 (1 NC)" },
+  { rank: "8", name: "Beneil Dariush", record: "23-6-1" },
+  { rank: "9", name: "Paddy Pimblett", record: "23-3" },
+  { rank: "10", name: "Rafael Fiziev", record: "13-4" },
+  { rank: "11", name: "Renato Moicano", record: "20-7-1" },
+  { rank: "12", name: "Michael Chandler", record: "23-10" },
+  { rank: "13", name: "Benoît Saint Denis", record: "14-3 (1 NC)" },
+  { rank: "14", name: "Grant Dawson", record: "23-2-1" },
+  { rank: "15", name: "Joel Álvarez", record: "22-3" }
+],
+  FW: [
+    { rank: "C", name: "Alexander Volkanovski", record: "27-4" },
+    { rank: "1", name: "Movsar Evloev", record: "19-0" },
+    { rank: "2", name: "Diego Lopes", record: "26-7" },
+    { rank: "3", name: "Yair Rodriguez", record: "21-5 (1 NC)" },
+    { rank: "4", name: "Arnold Allen", record: "20-3" },
+    { rank: "5", name: "Brian Ortega", record: "16-4 (1 NC)" },
+    { rank: "6", name: "Lerone Murphy", record: "16-0-1" },
+    { rank: "7", name: "Aljamain Sterling", record: "24-5" },
+    { rank: "8", name: "Josh Emmett", record: "19-5" },
+    { rank: "9", name: "Youssef Zalal", record: "17-5-1" },
+    { rank: "10", name: "Jean Silva", record: "16-2" },
+    { rank: "11", name: "Patrício Pitbull", record: "37-8" },
+    { rank: "12", name: "Steve Garcia", record: "18-5" },
+    { rank: "13", name: "David Onama", record: "14-2" },
+    { rank: "14", name: "Dan Ige", record: "19-10" },
+    { rank: "15", name: "Giga Chikadze", record: "15-5" }
+  ],
+  BW: [
+    { rank: "C", name: "Merab Dvalishvili", record: "20-4" },
+    { rank: "1", name: "Sean O'Malley", record: "18-3 (1 NC)" },
+    { rank: "2", name: "Umar Nurmagomedov", record: "18-1" },
+    { rank: "3", name: "Petr Yan", record: "18-5" },
+    { rank: "4", name: "Cory Sandhagen", record: "18-5" },
+    { rank: "5", name: "Song Yadong", record: "22-7-1 (1 NC)" },
+    { rank: "6", name: "Deiveson Figueiredo", record: "24-5-1" },
+    { rank: "7", name: "Marlon Vera", record: "23-10-1" },
+    { rank: "8", name: "Mario Bautista", record: "16-2" },
+    { rank: "9", name: "Rob Font", record: "22-8" },
+    { rank: "10", name: "Henry Cejudo", record: "16-5" },
+    { rank: "11", name: "Aiemann Zahabi", record: "13-2" },
+    { rank: "12", name: "Marcus McGhee", record: "10-1" },
+    { rank: "13", name: "Vinicius Oliveira", record: "23-3" },
+    { rank: "14", name: "Kyler Phillips", record: "12-4" },
+    { rank: "15", name: "Montel Jackson", record: "15-2" }
+  ],
+  FLW: [
+    { rank: "C", name: "Alexandre Pantoja", record: "30-5" },
+    { rank: "1", name: "Joshua Van", record: "15-2" },
+    { rank: "2", name: "Brandon Moreno", record: "23-8-2" },
+    { rank: "3", name: "Brandon Royval", record: "17-8" },
+    { rank: "4", name: "Amir Albazi", record: "17-2" },
+    { rank: "5", name: "Kai Kara-France", record: "25-12 (1 NC)" },
+    { rank: "6", name: "Tatsuro Taira", record: "16-1" },
+    { rank: "7", name: "Manel Kape", record: "21-7" },
+    { rank: "8", name: "Alex Perez", record: "25-9" },
+    { rank: "9", name: "Asu Almabayev", record: "21-3" },
+    { rank: "10", name: "Steve Erceg", record: "12-4" },
+    { rank: "11", name: "Tim Elliott", record: "20-13-1" },
+    { rank: "12", name: "Tagir Ulanbekov", record: "17-2" },
+    { rank: "13", name: "Ramazan Temirov", record: "19-3" },
+    { rank: "14", name: "Bruno Gustavo da Silva", record: "14-7-2 (1 NC)" },
+    { rank: "15", name: "Kai Asakura", record: "21-5" }
+  ]
+};
+
+  document.addEventListener('DOMContentLoaded', function() {
+    populateFighters();
+  });
+
+  function populateFighters() {
+    const division = document.getElementById("division").value;
+    const f1 = document.getElementById("fighter1");
+    const f2 = document.getElementById("fighter2");
+    f1.innerHTML = '';
+    f2.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select a fighter';
+    f1.appendChild(defaultOption.cloneNode(true));
+    f2.appendChild(defaultOption);
+
+    if (!roster[division]) return;
+
+    roster[division].forEach(f => {
+      const opt1 = document.createElement("option");
+      opt1.value = f.name;
+      opt1.text = `${f.rank !== "C" ? '#' + f.rank : 'Champion'} - ${f.name} (${f.record})`;
+      f1.add(opt1.cloneNode(true));
+      f2.add(opt1);
+    });
+  }
+
+  function addFight() {
+    const eventName = document.getElementById("eventName").value;
+    const eventLocation = document.getElementById("eventLocation").value;
+    const eventTime = document.getElementById("eventTime").value;
+    const division = document.getElementById("division").value;
+    const f1Select = document.getElementById("fighter1");
+    const f2Select = document.getElementById("fighter2");
+    const f1Custom = document.getElementById("custom1").value;
+    const f2Custom = document.getElementById("custom2").value;
+    const r1Custom = document.getElementById("record1").value;
+    const r2Custom = document.getElementById("record2").value;
+
+    const f1 = f1Select.value || f1Custom;
+    const f2 = f2Select.value || f2Custom;
+
+    if (!f1 || !f2) {
+      alert("Please select or enter both fighters!");
+      return;
+    }
+
+    const poster = document.getElementById("poster");
+
+    if (poster.querySelectorAll('.fight').length === 0) {
+      if (eventName) {
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'event-title';
+        titleDiv.textContent = eventName;
+        poster.appendChild(titleDiv);
+      }
+      if (eventLocation) {
+        const locationDiv = document.createElement('div');
+        locationDiv.className = 'division-name';
+        locationDiv.textContent = eventLocation;
+        poster.appendChild(locationDiv);
+      }
+      if (eventTime) {
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'division-name';
+        timeDiv.textContent = `Scheduled for: ${new Date(eventTime).toLocaleString()}`;
+        poster.appendChild(timeDiv);
+      }
+    }
+
+    const div = document.createElement("div");
+    div.className = "fight";
+
+    const getFighterDetails = (name, recordOverride) => {
+      return roster[division].find(f => f.name === name) ||
+             { name: name, rank: '', record: recordOverride || '--' };
+    };
+
+    const fighter1 = getFighterDetails(f1, r1Custom);
+    const fighter2 = getFighterDetails(f2, r2Custom);
+
+    const f1Div = document.createElement('div');
+    f1Div.className = 'fighter-info';
+    f1Div.innerHTML = `
+      <span class="fighter-name">
+        ${fighter1.rank ? `<span class="rank-tag">${fighter1.rank === "C" ? 'Champ' : '#'+fighter1.rank}</span>` : ''}
+        ${fighter1.name}
+      </span>
+      <span class="fighter-record">${fighter1.record}</span>
+    `;
+
+    const vsDiv = document.createElement('div');
+    vsDiv.className = 'vs';
+    vsDiv.textContent = 'vs';
+
+    const f2Div = document.createElement('div');
+    f2Div.className = 'fighter-info';
+    f2Div.innerHTML = `
+      <span class="fighter-name">
+        ${fighter2.rank ? `<span class="rank-tag">${fighter2.rank === "C" ? 'Champ' : '#'+fighter2.rank}</span>` : ''}
+        ${fighter2.name}
+      </span>
+      <span class="fighter-record">${fighter2.record}</span>
+    `;
+
+    const divLabel = document.createElement('div');
+    divLabel.className = 'division-name';
+    divLabel.textContent = document.getElementById("division").options[document.getElementById("division").selectedIndex].text;
+
+    div.appendChild(f1Div);
+    div.appendChild(vsDiv);
+    div.appendChild(f2Div);
+    div.appendChild(divLabel);
+
+    poster.appendChild(div);
+
+    // Clear inputs
+    f1Select.value = '';
+    f2Select.value = '';
+    document.getElementById("custom1").value = '';
+    document.getElementById("custom2").value = '';
+    document.getElementById("record1").value = '';
+    document.getElementById("record2").value = '';
+  }
+
+  function clearPoster() {
+    document.getElementById("poster").innerHTML = '<h2>Event Matchmaking</h2>';
+    document.getElementById("eventName").value = '';
+    document.getElementById("eventLocation").value = '';
+    document.getElementById("eventTime").value = '';
+  }
+
+  document.getElementById("division").addEventListener("change", populateFighters);
+</script>
+</body>
+</html>
