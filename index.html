@@ -1,463 +1,905 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>UFC Matchmaking Tool</title>
+  <meta charset="UTF-8">
+  <title>UFC Fight Card Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      background-color: #111; 
-      color: #fff; 
-      padding: 20px; 
-      margin: 0;
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+    :root {
+      --ufc-red: #d20a0f;
+      --ufc-dark: #18181c;
+      --ufc-light: #fff;
+      --ufc-gray: #242424;
+      --ufc-light-gray: #aaa;
+      --ufc-card-bg: #111115;
+      --ufc-border: #323232;
+      --ufc-text: #fff;
+      --ufc-gold: #f8d34c;
     }
-    .container { 
-      max-width: 800px; 
-      margin: 0 auto; 
-      height: 100vh;
-      overflow-y: auto;
+    body {
+      font-family: 'Roboto Condensed', Arial, sans-serif;
+      background: var(--ufc-dark);
+      color: var(--ufc-text);
+      padding: 20px;
+      min-height: 100vh;
     }
-    select, input, button { 
-      margin: 10px 0; 
-      padding: 8px; 
-      width: 100%; 
-      box-sizing: border-box;
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--ufc-card-bg);
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(210,10,15,0.25);
+      overflow: hidden;
+      border: 2px solid var(--ufc-red);
     }
-    .poster { 
-      border: 2px solid #444; 
-      padding: 15px; 
-      margin-top: 20px; 
-      background-color: #222; 
-      min-height: 200px;
+    header {
+      background: linear-gradient(to right, var(--ufc-dark) 0%, #1a1a1a 100%);
+      padding: 15px 30px;
+      text-align: center;
+      border-bottom: 4px solid var(--ufc-red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
-    .fight { 
-      margin: 10px 0; 
-      padding: 10px; 
-      border-bottom: 1px solid #555; 
+    .ufc-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
     }
-    .rank-tag { 
-      color: gold; 
-      font-weight: bold; 
-      margin-right: 6px; 
+    .logo-circle {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--ufc-red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 24px;
+      color: #fff;
+      border: 2px solid #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     }
-    #division {
-      margin-bottom: 20px;
+    h1, .section-title {
+      color: var(--ufc-red);
+      font-family: 'Roboto Condensed', Arial, sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .content {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      padding: 20px 32px 32px 32px;
+    }
+    .controls {
+      flex: 1 1 340px;
+      min-width: 340px;
+      max-width: 350px;
+      background: #191a1d;
+      padding: 18px 20px 20px 20px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      border: 1.5px solid var(--ufc-border);
+      box-shadow: 0 0 8px #2224 0.25;
+    }
+    .poster-container {
+      flex: 2 1 400px;
+      min-width: 400px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .input-group {
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+    .input-group label {
+      font-weight: 700;
+      font-size: 1em;
+      margin-bottom: 3px;
+      color: var(--ufc-light-gray);
+    }
+    .input-group input, .input-group select {
+      padding: 7px 10px;
+      border-radius: 6px;
+      border: 1.5px solid var(--ufc-border);
+      background: #16161a;
+      color: var(--ufc-light);
+      font-size: 1em;
+      outline: none;
+      font-family: 'Roboto Condensed', Arial, sans-serif;
+      margin-bottom: 2px;
+    }
+    .input-group input::placeholder {
+      color: #666;
+      opacity: 0.75;
+    }
+    .section-title {
+      margin: 18px 0 8px 0;
+      font-size: 1.1em;
+      border-left: 4px solid var(--ufc-red);
+      padding-left: 9px;
+    }
+    button, .theme-toggle {
+      background: var(--ufc-red);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-family: 'Roboto Condensed', Arial, sans-serif;
+      font-weight: 700;
+      padding: 9px 18px;
+      margin: 12px 0 4px 0;
+      cursor: pointer;
+      transition: background 0.18s;
+      box-shadow: 0 3px 12px rgba(210,10,15,0.10);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button:hover, .theme-toggle:hover {
+      background: #ae080d;
+    }
+    .custom-inputs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .custom-inputs .input-group {
+      flex: 1;
+    }
+    .poster {
+      background: #222226;
+      border-radius: 13px;
+      padding: 30px 18px 18px 18px;
+      border: 1.5px solid var(--ufc-border);
+      min-height: 400px;
+      margin-bottom: 18px;
+      box-shadow: 0 0 16px #14141855;
+      min-width: 330px;
     }
     .event-title {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #d10a11;
+      font-size: 2.0em;
+      font-weight: 800;
+      letter-spacing: 2px;
       text-align: center;
+      margin-bottom: 8px;
+      color: var(--ufc-gold);
     }
-    .fighter-info {
+    .event-details {
+      text-align: center;
+      font-size: 1em;
+      color: var(--ufc-light-gray);
+      margin-bottom: 18px;
+    }
+    .empty-poster {
+      text-align: center;
+      color: #888;
+      margin-top: 48px;
+      font-size: 1.18em;
+    }
+    .card-section {
+      margin-top: 12px;
+      margin-bottom: 8px;
+    }
+    .section-header {
+      background: #2c2c32;
+      color: var(--ufc-gold);
+      padding: 6px 0 5px 8px;
+      border-radius: 8px 8px 0 0;
+      font-size: 1.13em;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 8px;
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 5px;
+      align-items: center;
+      gap: 8px;
     }
-    .fighter-name {
+    .fights-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .fight-card {
+      background: #25252b;
+      border-radius: 10px;
+      box-shadow: 0 1px 6px #1112;
+      padding: 12px 14px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-left: 4px solid var(--ufc-red);
+      position: relative;
+    }
+    .fight-tier {
+      background: var(--ufc-gold);
+      color: #222;
+      padding: 2px 9px;
+      border-radius: 6px;
+      font-size: 0.93em;
       font-weight: bold;
+      letter-spacing: 1.2px;
+      z-index: 2;
+      margin-bottom: 2px;
+      margin-top: 3px;
+      display: inline-block;
     }
-    .fighter-record {
-      color: #aaa;
-      font-size: 0.9em;
-    }
-    .vs {
-      text-align: center;
-      margin: 5px 0;
+    .delete-btn {
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 1.15em;
       font-weight: bold;
-      color: #d10a11;
+      cursor: pointer;
+      align-self: center;
+      margin-left: 18px;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .delete-btn:hover {
+      background: #d20a0f;
     }
     .division-name {
-      font-size: 0.8em;
+      color: var(--ufc-light-gray);
+      font-size: 1.1em;
+      margin-bottom: 5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .fighters {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      margin: 3px 0 3px 0;
+    }
+    .fighter {
+      flex: 1 1 100px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    .fighter-photo {
+      width: 65px;
+      height: 65px;
+      background: #18181c;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid var(--ufc-red);
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 7px #1a1a1a55;
+    }
+    .fighter-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .fighter-name {
+      font-weight: 700;
+      font-size: 1.08em;
+      color: var(--ufc-light);
+    }
+    .fighter-details {
+      font-size: 0.96em;
+      color: #bcbcbc;
+      font-family: 'Roboto Condensed', Arial, sans-serif;
+    }
+    .vs {
+      font-size: 1.45em;
+      font-weight: bold;
+      color: var(--ufc-red);
+      font-family: 'Roboto Condensed', Arial, sans-serif;
+      margin: 0 12px;
+    }
+    .rank-tag {
+      background: var(--ufc-gold);
+      color: #222;
+      border-radius: 4px;
+      font-size: 0.98em;
+      font-weight: 600;
+      padding: 1.5px 6px 1.5px 6px;
+      margin-left: 6px;
+      margin-right: 6px;
+      vertical-align: middle;
+      letter-spacing: 0.5px;
+    }
+    .footer {
+      background: #141415;
       color: #888;
       text-align: center;
-      margin-bottom: 10px;
+      padding: 16px 0;
+      font-size: 1em;
+      letter-spacing: 1px;
+      font-family: 'Roboto Condensed', Arial, sans-serif;
+    }
+    .roster-size {
+      margin: 15px 0 0 0;
+      color: #b8b8b8;
+      font-size: 1.04em;
+      text-align: left;
+    }
+    .theme-toggle {
+      position: absolute;
+      right: 24px;
+      top: 15px;
+      background: transparent;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      font-size: 1.5em;
+      padding: 0;
+      z-index: 5;
+    }
+    @media (max-width: 900px) {
+      .content { flex-direction: column; }
+      .poster-container { min-width: unset; max-width: unset; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>UFC Matchmaking Tool</h1>
-    
-    <label for="eventName">Event Name:</label>
-    <input type="text" id="eventName" placeholder="Enter event name (e.g. UFC 300)">
-
-    <label for="eventLocation">Location / Venue:</label>
-    <input type="text" id="eventLocation" placeholder="Enter location (e.g. T-Mobile Arena)">
-
-    <label for="eventTime">Event Date & Time:</label>
-    <input type="datetime-local" id="eventTime">
-
-    <label for="division">Select Division:</label>
-    <select id="division">
-      <option value="HW">Heavyweight</option>
-      <option value="LHW">Light Heavyweight</option>
-      <option value="MW">Middleweight</option>
-      <option value="WW">Welterweight</option>
-      <option value="LW">Lightweight</option>
-      <option value="FW">Featherweight</option>
-      <option value="BW">Bantamweight</option>
-      <option value="FLW">Flyweight</option>
-      <option value="WBW">Women's Bantamweight</option>
-      <option value="WFLW">Women's Flyweight</option>
-      <option value="WSW">Women's Strawweight</option>
-    </select>
-
-    <label for="fighter1">Select Fighter 1:</label>
-    <select id="fighter1"></select>
-    <input type="text" id="custom1" placeholder="Or type unranked Fighter 1" />
-    <input type="text" id="record1" placeholder="Fighter 1 record (e.g. 10-2)" />
-
-    <label for="fighter2">Select Fighter 2:</label>
-    <select id="fighter2"></select>
-    <input type="text" id="custom2" placeholder="Or type unranked Fighter 2" />
-    <input type="text" id="record2" placeholder="Fighter 2 record (e.g. 12-3)" />
-
-    <button onclick="addFight()">Add to Poster</button>
-    <button onclick="clearPoster()" style="background-color: #444; color: white;">Clear Poster</button>
-
-    <div class="poster" id="poster">
-      <h2>Event Matchmaking</h2>
+<header>
+  <div class="ufc-logo">
+    <div class="logo-circle">UFC</div>
+    <h1>FIGHT CARD GENERATOR</h1>
+  </div>
+  <button class="theme-toggle" id="theme-toggle">
+    <i class="fas fa-moon"></i>
+  </button>
+</header>
+<div class="content">
+  <div class="controls">
+    <h2 class="section-title">Event Details</h2>
+    <div class="event-controls">
+      <div class="input-group">
+        <label for="event-name">Event Name:</label>
+        <input type="text" id="event-name" value="UFC: Championship Night">
+      </div>
+      <div class="input-group optional-field">
+        <label for="event-location">Location (Optional):</label>
+        <input type="text" id="event-location" placeholder="e.g., Las Vegas, Nevada">
+      </div>
+      <div class="input-group optional-field">
+        <label for="event-date">Date (Optional):</label>
+        <input type="text" id="event-date" placeholder="e.g., Saturday, July 26, 2025">
+      </div>
+      <div class="input-group optional-field">
+        <label for="event-time">Time (Optional):</label>
+        <input type="text" id="event-time" placeholder="e.g., 10:00 PM ET">
+      </div>
+    </div>
+    <h2 class="section-title">Create Matchup</h2>
+    <div class="input-group">
+      <label for="division">Division:</label>
+      <select id="division"></select>
+    </div>
+    <div class="input-group">
+      <label for="fight-type">Fight Tier:</label>
+      <select id="fight-type">
+        <option value="Main Event">Main Event</option>
+        <option value="Co-Main Event">Co-Main Event</option>
+        <option value="Featured Fight">Featured Fight</option>
+        <option value="Main Card">Main Card</option>
+        <option value="Featured Prelim">Featured Prelim</option>
+        <option value="Prelim">Prelim</option>
+        <option value="Early Prelim">Early Prelim</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label for="fighter1">Fighter 1:</label>
+      <select id="fighter1"></select>
+    </div>
+    <div class="custom-inputs">
+      <div class="input-group">
+        <label for="custom1">Custom Fighter 1:</label>
+        <input type="text" id="custom1" placeholder="Enter custom fighter name">
+      </div>
+      <div class="input-group">
+        <label for="record1">Fighter 1 Record:</label>
+        <input type="text" id="record1" placeholder="e.g., 15-3">
+      </div>
+    </div>
+    <div class="input-group">
+      <label for="fighter2">Fighter 2:</label>
+      <select id="fighter2"></select>
+    </div>
+    <div class="custom-inputs">
+      <div class="input-group">
+        <label for="custom2">Custom Fighter 2:</label>
+        <input type="text" id="custom2" placeholder="Enter custom fighter name">
+      </div>
+      <div class="input-group">
+        <label for="record2">Fighter 2 Record:</label>
+        <input type="text" id="record2" placeholder="e.g., 13-2">
+      </div>
+    </div>
+    <button onclick="addFight()">
+      <i class="fas fa-plus-circle"></i> Add Fight to Card
+    </button>
+    <div class="roster-size">
+      <i class="fas fa-users"></i> Full UFC Roster: 176 Ranked Fighters
     </div>
   </div>
-
+  <div class="poster-container">
+    <h2 class="section-title">Fight Card</h2>
+    <div class="poster" id="poster">
+      <div class="event-title" id="event-title">UFC: Championship Night</div>
+      <div class="event-details" id="event-details"></div>
+      <div class="empty-poster" id="empty-poster">
+        <p>No fights added yet</p>
+        <p>Select fighters and add matchups to build your card</p>
+      </div>
+      <div class="card-section" id="main-card-section">
+        <div class="section-header">
+          <i class="fas fa-trophy"></i> Main Card
+        </div>
+        <div class="fights-container" id="main-card-container"></div>
+      </div>
+      <div class="card-section" id="prelims-section">
+        <div class="section-header">
+          <i class="fas fa-bolt"></i> Prelims
+        </div>
+        <div class="fights-container" id="prelims-container"></div>
+      </div>
+      <div class="card-section" id="early-prelims-section">
+        <div class="section-header">
+          <i class="fas fa-clock"></i> Early Prelims
+        </div>
+        <div class="fights-container" id="early-prelims-container"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <p>UFC Fight Card Generator • Professional event structuring</p>
+</div>
 <script>
+const divisionNames = {
+  HW: "Heavyweight",
+  LHW: "Light Heavyweight",
+  MW: "Middleweight",
+  WW: "Welterweight",
+  LW: "Lightweight",
+  FW: "Featherweight",
+  BW: "Bantamweight",
+  FLW: "Flyweight",
+  WBW: "Women's Bantamweight",
+  WFLW: "Women's Flyweight",
+  WSW: "Women's Strawweight"
+};
+const placeholderImg = "https://dmxg5wxfqgb4u.cloudfront.net/styles/athlete_bio_full_body/s3/2021-07/UFC_ATHLETE_IMAGE_PLACEHOLDER.png";
+
 const roster = {
-  HW: [
-    { rank: "C", name: "Tom Aspinall", record: "15-3" },
-    { rank: "1", name: "Ciryl Gane", record: "13-2" },
-    { rank: "2", name: "Alexander Volkov", record: "38-11" },
-    { rank: "3", name: "Sergei Pavlovich", record: "19-3" },
-    { rank: "4", name: "Curtis Blaydes", record: "19-5 (1 NC)" },
-    { rank: "5", name: "Jailton Almeida", record: "22-3" },
-    { rank: "6", name: "Waldo Cortes-Acosta", record: "14-1" },
-    { rank: "7", name: "Marcin Tybura", record: "27-9" },
-    { rank: "8", name: "Serghei Spivac", record: "17-6" },
-    { rank: "9", name: "Derrick Lewis", record: "29-12 (1 NC)" },
-    { rank: "10", name: "Tai Tuivasa", record: "14-8" },
-    { rank: "11", name: "Shamil Gaziev", record: "14-1" },
-    { rank: "12", name: "Mick Parkin", record: "10-1" },
-    { rank: "13", name: "Martin Buday", record: "15-2" },
-    { rank: "14", name: "Tallison Teixeira", record: "8-1" },
-    { rank: "15", name: "Rizvan Kuniev", record: "12-3-1 (1 NC)" }
+ HW: [
+  { rank: "C", name: "Tom Aspinall", record: "15-3", espnId: 4010976, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4010976.png&w=350&h=254" },
+  { rank: "1", name: "Ciryl Gane", record: "13-2", espnId: 4474376, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4426000.png&w=350&h=254" },
+  { rank: "2", name: "Alexander Volkov", record: "38-11", espnId: 3139318, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2993650.png&w=350&h=254" },
+  { rank: "3", name: "Sergei Pavlovich", record: "19-3", espnId: 4873640, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4217395.png&w=350&h=254" },
+  { rank: "4", name: "Curtis Blaydes", record: "19-5 (1 NC)", espnId: 3929136, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3922557.png&w=350&h=254" },
+  { rank: "5", name: "Jailton Almeida", record: "22-3", espnId: 4876353, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4873640.png&w=350&h=254" },
+  { rank: "6", name: "Waldo Cortes-Acosta", record: "14-1", espnId: 4705940, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4903365.png&w=350&h=254" },
+  { rank: "7", name: "Marcin Tybura", record: "27-9", espnId: 3158199, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3093559.png&w=350&h=254" },
+  { rank: "8", name: "Serghei Spivac", record: "17-6", espnId: 4278927, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4421246.png&w=350&h=254" },
+  { rank: "9", name: "Derrick Lewis", record: "29-12 (1 NC)", espnId: 2525669, photo: "https://a.espncdn.com/i/headshots/mma/players/full/2560713.png" },
+  { rank: "10", name: "Tai Tuivasa", record: "14-8", espnId: 3991534, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3722422.png&w=350&h=254" },
+  { rank: "11", name: "Shamil Gaziev", record: "14-1", espnId: 4712329, photo: "https://a.espncdn.com/i/headshots/mma/players/full/5145498.png" },
+  { rank: "12", name: "Mick Parkin", record: "10-1", espnId: 4879026, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/5060505.png&w=350&h=254" },
+  { rank: "13", name: "Martin Buday", record: "16-2", espnId: 4710939, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4406574.png&w=350&h=254" },
+  { rank: "14", name: "Tallison Teixeira", record: "8-1", espnId: 6314846, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/5212856.png&w=350&h=254" },
+  { rank: "15", name: "Rizvan Kuniev", record: "12-3-1 (1 NC)", espnId: 4878309, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4001837.png" }
   ],
   LHW: [
-    { rank: "C", name: "Magomed Ankalaev", record: "20-1-1 (1 NC)" },
-    { rank: "1", name: "Alex Pereira", record: "12-3" },
-    { rank: "2", name: "Jiří Procházka", record: "31-5-1" },
-    { rank: "3", name: "Carlos Ulberg", record: "12-1" },
-    { rank: "4", name: "Khalil Rountree Jr.", record: "14-6 (1 NC)" },
-    { rank: "5", name: "Jan Błachowicz", record: "29-11-1" },
-    { rank: "6", name: "Jamahal Hill", record: "12-4 (1 NC)" },
-    { rank: "7", name: "Aleksandar Rakić", record: "14-5" },
-    { rank: "8", name: "Dominick Reyes", record: "15-4" },
-    { rank: "9", name: "Volkan Oezdemir", record: "20-8" },
-    { rank: "10", name: "Nikita Krylov", record: "30-10" },
-    { rank: "11", name: "Azamat Murzakanov", record: "15-0" },
-    { rank: "12", name: "Johnny Walker", record: "21-9 (1 NC)" },
-    { rank: "13", name: "Bogdan Guskov", record: "17-3" },
-    { rank: "14", name: "Zhang Mingyang", record: "19-6" },
-    { rank: "15", name: "Alonzo Menifield", record: "17-5-1" }
+    { rank: "C", name: "Magomed Ankalaev", record: "20-1-1 (1 NC)", espnId: 4233626, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4273399.png&w=350&h=254" },
+    { rank: "1", name: "Alex Pereira", record: "12-3", espnId: 4582996, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4705658.png&w=350&h=254" },
+    { rank: "2", name: "Jiří Procházka", record: "31-5-1", espnId: 4282396, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3156612.png&w=350&h=254" },
+    { rank: "3", name: "Carlos Ulberg", record: "12-1", espnId: 4334876, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4695736.png" },
+    { rank: "4", name: "Khalil Rountree Jr.", record: "14-6 (1 NC)", espnId: 3920758, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4028627.png&w=350&h=254" },
+    { rank: "5", name: "Jan Błachowicz", record: "29-11-1", espnId: 2602511, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2506250.png&w=350&h=254" },
+    { rank: "6", name: "Jamahal Hill", record: "12-4 (1 NC)", espnId: 4349678, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4425355.png" },
+    { rank: "7", name: "Aleksandar Rakić", record: "14-5", espnId: 4105596, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4079314.png&w=350&h=254" },
+    { rank: "8", name: "Dominick Reyes", record: "15-4", espnId: 3896308, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4233039.png" },
+    { rank: "9", name: "Volkan Oezdemir", record: "20-8", espnId: 3917683, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3110836.png&w=350&h=254" },
+    { rank: "10", name: "Nikita Krylov", record: "30-11", espnId: 3896304, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3026263.png" },
+    { rank: "11", name: "Azamat Murzakanov", record: "15-0", espnId: 4713099, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4227265.png&w=350&h=254" },
+    { rank: "12", name: "Johnny Walker", record: "21-9 (1 NC)", espnId: 4243838, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3146944.png&w=350&h=254" },
+    { rank: "13", name: "Bogdan Guskov", record: "18-3", espnId: 4842698, photo: "https://a.espncdn.com/i/headshots/mma/players/full/5152109.png" },
+    { rank: "14", name: "Zhang Mingyang", record: "19-6", espnId: 4844315, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4845284.png&w=350&h=254" },
+    { rank: "15", name: "Alonzo Menifield", record: "17-5-1", espnId: 4353072, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3948876.png" }
   ],
   MW: [
-    { rank: "C", name: "Dricus du Plessis", record: "23-2" },
-    { rank: "1", name: "Nassourdine Imavov", record: "16-4 (1 NC)" },
-    { rank: "2", name: "Sean Strickland", record: "29-7" },
-    { rank: "3", name: "Khamzat Chimaev", record: "14-0" },
-    { rank: "4", name: "Israel Adesanya", record: "24-5" },
-    { rank: "5", name: "Robert Whittaker", record: "26-8" },
-    { rank: "6", name: "Caio Borralho", record: "17-1 (1 NC)" },
-    { rank: "7", name: "Jared Cannonier", record: "18-8" },
-    { rank: "8", name: "Roman Dolidze", record: "15-3" },
-    { rank: "9", name: "Anthony Hernandez", record: "14-2 (1 NC)" },
-    { rank: "10", name: "Brendan Allen", record: "25-7" },
-    { rank: "11", name: "Paulo Costa", record: "15-4" },
-    { rank: "12", name: "Marvin Vettori", record: "19-9-1" },
-    { rank: "13", name: "Reinier de Ridder", record: "20-2" },
-    { rank: "14", name: "Abusupiyan Magomedov", record: "28-6-1" },
-    { rank: "15", name: "Roman Kopylov", record: "14-4" }
+    { rank: "C", name: "Dricus du Plessis", record: "23-2", espnId: 4255487, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3166126.png&w=350&h=254" },
+    { rank: "1", name: "Nassourdine Imavov", record: "16-4 (1 NC)", espnId: 4713066, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4690539.png" },
+    { rank: "2", name: "Sean Strickland", record: "29-7", espnId: 2999658, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3093653.png&w=350&h=254" },
+    { rank: "3", name: "Khamzat Chimaev", record: "14-0", espnId: 4472552, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4684751.png&w=350&h=254" },
+    { rank: "4", name: "Israel Adesanya", record: "24-5", espnId: 4474392, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4285679.png&w=350&h=254" },
+    { rank: "5", name: "Robert Whittaker", record: "26-9", espnId: 2990006, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3009717.png&w=350&h=254" },
+    { rank: "6", name: "Caio Borralho", record: "17-1 (1 NC)", espnId: 4713089, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4835137.png" },
+    { rank: "7", name: "Jared Cannonier", record: "18-8", espnId: 3909487, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3154860.png&w=350&h=254" },
+    { rank: "8", name: "Roman Dolidze", record: "15-3", espnId: 4713065, photo: "hhttps://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4411508.png&w=350&h=254" },
+    { rank: "9", name: "Anthony Hernandez", record: "14-2 (1 NC)", espnId: 4139026, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4290956.png" },
+    { rank: "10", name: "Brendan Allen", record: "25-7", espnId: 4281237, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4025699.png&w=350&h=254" },
+    { rank: "11 (T)", name: "Paulo Costa", record: "15-4", espnId: 4233627, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4080826.png&w=350&h=254" },
+    { rank: "11 (T)", name: "Marvin Vettori", record: "19-9-1", espnId: 3928887, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4001851.png&w=350&h=254" },
+    { rank: "13", name: "Reinier de Ridder", record: "21-2", espnId: 4380180, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4423880.png&w=350&h=254" },
+    { rank: "14", name: "Abusupiyan Magomedov", record: "28-6-1", espnId: 4713257, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3077822.png&w=350&h=254" },
+    { rank: "15", name: "Roman Kopylov", record: "14-4", espnId: 4713100, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4300149.png&w=350&h=254" }
   ],
   WW: [
-    { rank: "C", name: "Jack Della Maddalena", record: "18-2" },
-    { rank: "1", name: "Belal Muhammad", record: "24-4 (1 NC)" },
-    { rank: "2", name: "Sean Brady", record: "18-1" },
-    { rank: "3", name: "Shavkat Rakhmonov", record: "19-0" },
-    { rank: "4", name: "Leon Edwards", record: "22-5 (1 NC)" },
-    { rank: "5", name: "Kamaru Usman", record: "21-4" },
-    { rank: "6", name: "Ian Machado Garry", record: "16-1" },
-    { rank: "7", name: "Michael Morales", record: "18-0" },
-    { rank: "8", name: "Joaquin Buckley", record: "21-7" },
-    { rank: "9", name: "Colby Covington", record: "17-5" },
-    { rank: "10", name: "Geoff Neal", record: "16-6" },
-    { rank: "11", name: "Gilbert Burns", record: "22-9" },
-    { rank: "12", name: "Carlos Prates", record: "21-7" },
-    { rank: "13", name: "Gabriel Bonfim", record: "18-1" },
-    { rank: "14", name: "Daniel Rodriguez", record: "20-5" },
-    { rank: "15", name: "Michael Page", record: "23-3" }
+    { rank: "C", name: "Jack Della Maddalena", record: "18-2", espnId: 4713140, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4828707.png&w=350&h=254" },
+    { rank: "1", name: "Belal Muhammad", record: "24-4 (1 NC)", espnId: 4034348, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3172112.png&w=350&h=254" },
+    { rank: "2", name: "Sean Brady", record: "18-1", espnId: 4138213, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4295192.png&w=350&h=254" },
+    { rank: "3", name: "Shavkat Rakhmonov", record: "19-0", espnId: 4713181, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4020699.png&w=350&h=254" },
+    { rank: "4", name: "Leon Edwards", record: "22-5 (1 NC)", espnId: 3939686, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3152929.png" },
+    { rank: "5", name: "Kamaru Usman", record: "21-4", espnId: 3029671, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3088812.png" },
+    { rank: "6", name: "Ian Machado Garry", record: "16-1", espnId: 4713979, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4738092.png&w=350&h=254" },
+    { rank: "7", name: "Michael Morales", record: "18-0", espnId: 4878683, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4869426.png&w=350&h=254" },
+    { rank: "8", name: "Joaquin Buckley", record: "21-7", espnId: 4243853, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4024714.png&w=350&h=254" },
+    { rank: "9", name: "Colby Covington", record: "17-5", espnId: 2995512, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3088810.png&w=350&h=254" },
+    { rank: "10", name: "Geoff Neal", record: "16-6", espnId: 4353073, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3111997.png&w=350&h=254" },
+    { rank: "11", name: "Gilbert Burns", record: "22-9", espnId: 2990205, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3090197.png" },
+    { rank: "12", name: "Carlos Prates", record: "21-7", espnId: 6314807, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4294832.png&w=350&h=254" },
+    { rank: "13", name: "Gabriel Bonfim", record: "18-1", espnId: 4713975, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4921516.png" },
+    { rank: "14", name: "Daniel Rodriguez", record: "20-5", espnId: 4411832, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4426312.png&w=350&h=254" },
+    { rank: "15", name: "Michael Page", record: "23-3", espnId: 4137779, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3022067.png&w=350&h=254" }
   ],
-  LW: [
-    { rank: "C", name: "Ilia Topuria", record: "17-0" },
-    { rank: "1", name: "Islam Makhachev", record: "27-1" },
-    { rank: "2", name: "Arman Tsarukyan", record: "22-3" },
-    { rank: "3", name: "Charles Oliveira", record: "35-11 (1 NC)" },
-    { rank: "4", name: "Max Holloway", record: "27-8" },
-    { rank: "5", name: "Justin Gaethje", record: "26-5" },
-    { rank: "6", name: "Dan Hooker", record: "24-12" },
-    { rank: "7", name: "Mateusz Gamrot", record: "25-3 (1 NC)" },
-    { rank: "8", name: "Beneil Dariush", record: "23-6-1" },
-    { rank: "9", name: "Paddy Pimblett", record: "23-3" },
-    { rank: "10", name: "Rafael Fiziev", record: "13-4" },
-    { rank: "11", name: "Renato Moicano", record: "20-7-1" },
-    { rank: "12", name: "Michael Chandler", record: "23-10" },
-    { rank: "13", name: "Benoît Saint Denis", record: "14-3 (1 NC)" },
-    { rank: "14", name: "Grant Dawson", record: "23-2-1" },
-    { rank: "15", name: "Joel Álvarez", record: "22-3" }
+   LW: [
+    { rank: "C", name: "Ilia Topuria", record: "17-0", espnId: 4391280, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4350812.png" },
+    { rank: "1", name: "Islam Makhachev", record: "27-1", espnId: 3026519, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3332412.png&w=350&h=254" },
+    { rank: "2", name: "Arman Tsarukyan", record: "22-3", espnId: 4375449, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4419372.png" },
+    { rank: "3", name: "Charles Oliveira", record: "35-11 (1 NC)", espnId: 3026277, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2504169.png&w=350&h=254" },
+    { rank: "4", name: "Max Holloway", record: "27-8", espnId: 3026013, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2614933.png&w=350&h=254" },
+    { rank: "5", name: "Justin Gaethje", record: "26-5", espnId: 2995993, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3022345.png" },
+    { rank: "6", name: "Dan Hooker", record: "24-12", espnId: 3939123, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3109135.png&w=350&h=254" },
+    { rank: "7", name: "Mateusz Gamrot", record: "25-3 (1 NC)", espnId: 4244125, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3068125.png&w=350&h=254" },
+    { rank: "8", name: "Beneil Dariush", record: "23-6-1", espnId: 3026485, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3085551.png" },
+    { rank: "9", name: "Paddy Pimblett", record: "23-3", espnId: 4713108, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4008549.png&w=350&h=254" },
+    { rank: "10", name: "Rafael Fiziev", record: "13-4", espnId: 4280547, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4339488.png&w=350&h=254" },
+    { rank: "11", name: "Renato Moicano", record: "20-7-1", espnId: 3896309, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3028863.png" },
+    { rank: "12", name: "Michael Chandler", record: "23-10", espnId: 2901077, photo: "https://a.espncdn.com/i/headshots/mma/players/full/2504988.png" },
+    { rank: "13", name: "Benoît Saint Denis", record: "14-3 (1 NC)", espnId: 4878586, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4895362.png" },
+    { rank: "14", name: "Grant Dawson", record: "23-2-1", espnId: 4243071, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3931156.png&w=350&h=254" },
+    { rank: "15", name: "Joel Álvarez", record: "22-3", espnId: 4269025, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4411888.png" }
   ],
   FW: [
-    { rank: "C", name: "Alexander Volkanovski", record: "27-4" },
-    { rank: "1", name: "Movsar Evloev", record: "19-0" },
-    { rank: "2", name: "Diego Lopes", record: "26-7" },
-    { rank: "3", name: "Yair Rodriguez", record: "21-5 (1 NC)" },
-    { rank: "4", name: "Arnold Allen", record: "20-3" },
-    { rank: "5", name: "Brian Ortega", record: "16-4 (1 NC)" },
-    { rank: "6", name: "Lerone Murphy", record: "16-0-1" },
-    { rank: "7", name: "Aljamain Sterling", record: "24-5" },
-    { rank: "8", name: "Josh Emmett", record: "19-5" },
-    { rank: "9", name: "Youssef Zalal", record: "17-5-1" },
-    { rank: "10", name: "Jean Silva", record: "16-2" },
-    { rank: "11", name: "Patrício Pitbull", record: "37-8" },
-    { rank: "12", name: "Steve Garcia", record: "18-5" },
-    { rank: "13", name: "David Onama", record: "14-2" },
-    { rank: "14", name: "Dan Ige", record: "19-10" },
-    { rank: "15", name: "Giga Chikadze", record: "15-5" }
+    { rank: "C", name: "Alexander Volkanovski", record: "27-4", espnId: 3940101, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3949584.png&w=350&h=254" },
+    { rank: "1", name: "Movsar Evloev", record: "19-0", espnId: 4369370, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4369370.png&w=350&h=254" },
+    { rank: "2", name: "Diego Lopes", record: "26-7", espnId: 4373873, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4881999.png4" },
+    { rank: "3", name: "Yair Rodríguez", record: "21-5 (1 NC)", espnId: 3112310, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3155420.png&w=350&h=254" },
+    { rank: "4 (T)", name: "Arnold Allen", record: "20-3", espnId: 3975270, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3902098.png&w=350&h=254" },
+    { rank: "4 (T)", name: "Brian Ortega", record: "16-4 (1 NC)", espnId: 3875024, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3045737.png&w=350&h=254" },
+    { rank: "6", name: "Lerone Murphy", record: "16-0-1", espnId: 4713127, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4576101.png&w=350&h=254" },
+    { rank: "7", name: "Aljamain Sterling", record: "24-5", espnId: 2995686, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3031559.png" },
+    { rank: "8", name: "Josh Emmett", record: "19-5", espnId: 2995812, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4011299.png" },
+    { rank: "9", name: "Youssef Zalal", record: "17-5-1", espnId: 4399621, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4351319.png&w=350&h=254" },
+    { rank: "10", name: "Jean Silva", record: "16-2", espnId: 6315078, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/5145766.png&w=350&h=254" },
+    { rank: "11", name: "Patrício Pitbull", record: "37-8", espnId: 2555523, photo: "https://a.espncdn.com/i/headshots/mma/players/full/2532870.png" },
+    { rank: "12", name: "Steve Garcia", record: "18-5", espnId: 4373870, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3023804.png&w=350&h=254" },
+    { rank: "13", name: "David Onama", record: "14-2", espnId: 4878778, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4897850.png&w=350&h=254" },
+    { rank: "14", name: "Dan Ige", record: "19-10", espnId: 3896302, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4074001.png" },
+    { rank: "15", name: "Giga Chikadze", record: "15-5", espnId: 4873949, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3957071.png&w=350&h=254" }
   ],
   BW: [
-    { rank: "C", name: "Merab Dvalishvili", record: "20-4" },
-    { rank: "1", name: "Sean O'Malley", record: "18-3 (1 NC)" },
-    { rank: "2", name: "Umar Nurmagomedov", record: "18-1" },
-    { rank: "3", name: "Petr Yan", record: "18-5" },
-    { rank: "4", name: "Cory Sandhagen", record: "18-5" },
-    { rank: "5", name: "Song Yadong", record: "22-7-1 (1 NC)" },
-    { rank: "6", name: "Deiveson Figueiredo", record: "24-5-1" },
-    { rank: "7", name: "Marlon Vera", record: "23-10-1" },
-    { rank: "8", name: "Mario Bautista", record: "16-2" },
-    { rank: "9", name: "Rob Font", record: "22-8" },
-    { rank: "10", name: "Henry Cejudo", record: "16-5" },
-    { rank: "11", name: "Aiemann Zahabi", record: "13-2" },
-    { rank: "12", name: "Marcus McGhee", record: "10-1" },
-    { rank: "13", name: "Vinicius Oliveira", record: "23-3" },
-    { rank: "14", name: "Kyler Phillips", record: "12-4" },
-    { rank: "15", name: "Montel Jackson", record: "15-2" }
+    { rank: "C", name: "Merab Dvalishvili", record: "20-4", espnId: 4243393, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3948572.png&w=350&h=254" },
+    { rank: "1", name: "Sean O'Malley", record: "18-3 (1 NC)", espnId: 4295394, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4205093.png" },
+    { rank: "2", name: "Umar Nurmagomedov", record: "18-1", espnId: 4705942, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4569549.png&w=350&h=254" },
+    { rank: "3", name: "Petr Yan", record: "19-5", espnId: 4035887, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4293517.png" },
+    { rank: "4", name: "Cory Sandhagen", record: "18-5", espnId: 4218527, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4294504.png&w=350&h=254" },
+    { rank: "5", name: "Song Yadong", record: "22-7-1 (1 NC)", espnId: 4278779, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3151289.png&w=350&h=254" },
+    { rank: "6", name: "Deiveson Figueiredo", record: "24-5-1", espnId: 4233625, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4189320.png&w=350&h=254" },
+    { rank: "7", name: "Marlon Vera", record: "23-10-1", espnId: 3158393, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3155424.png" },
+    { rank: "8", name: "Mario Bautista", record: "16-2", espnId: 4391100, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4410868.png&w=350&h=254" },
+    { rank: "9", name: "Rob Font", record: "22-8", espnId: 3917672, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3090451.png&w=350&h=254" },
+    { rank: "10", name: "Henry Cejudo", record: "16-5", espnId: 2992063, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3023388.png" },
+    { rank: "11", name: "Aiemann Zahabi", record: "13-2", espnId: 3897307, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4079149.png&w=350&h=254" },
+    { rank: "12", name: "Marcus McGhee", record: "10-2", espnId: 6314812, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4895760.png&w=350&h=254" },
+    { rank: "13", name: "Vinicius Oliveira", record: "23-3", espnId: 4878507, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4884877.png" },
+    { rank: "14", name: "Kyler Phillips", record: "12-4", espnId: 4156292, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4237015.png&w=350&h=254" },
+    { rank: "15", name: "Montel Jackson", record: "15-2", espnId: 4295626, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4339130.png&w=350&h=254" }
   ],
   FLW: [
-    { rank: "C", name: "Alexandre Pantoja", record: "30-5" },
-    { rank: "1", name: "Joshua Van", record: "15-2" },
-    { rank: "2", name: "Brandon Moreno", record: "23-8-2" },
-    { rank: "3", name: "Brandon Royval", record: "17-8" },
-    { rank: "4", name: "Amir Albazi", record: "17-2" },
-    { rank: "5", name: "Kai Kara-France", record: "25-12 (1 NC)" },
-    { rank: "6", name: "Tatsuro Taira", record: "16-1" },
-    { rank: "7", name: "Manel Kape", record: "21-7" },
-    { rank: "8", name: "Alex Perez", record: "25-9" },
-    { rank: "9", name: "Asu Almabayev", record: "21-3" },
-    { rank: "10", name: "Steve Erceg", record: "12-4" },
-    { rank: "11", name: "Tim Elliott", record: "20-13-1" },
-    { rank: "12", name: "Tagir Ulanbekov", record: "17-2" },
-    { rank: "13", name: "Ramazan Temirov", record: "19-3" },
-    { rank: "14", name: "Bruno Gustavo da Silva", record: "14-7-2 (1 NC)" },
-    { rank: "15", name: "Kai Asakura", record: "21-5" }
+    { rank: "C", name: "Alexandre Pantoja", record: "30-5", espnId: 3901484, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2560746.png&w=350&h=254" },
+    { rank: "1", name: "Joshua Van", record: "15-2", espnId: 4878926, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/5120301.png&w=350&h=254" },
+    { rank: "2", name: "Brandon Moreno", record: "23-8-2", espnId: 3896303, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3027545.png" },
+    { rank: "3", name: "Brandon Royval", record: "17-8", espnId: 4402266, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4239928.png&w=350&h=254" },
+    { rank: "4", name: "Amir Albazi", record: "17-2", espnId: 4472553, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4684848.png&w=350&h=254" },
+    { rank: "5", name: "Kai Kara-France", record: "25-12 (1 NC)", espnId: 3909478, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4243885.png" },
+    { rank: "6", name: "Tatsuro Taira", record: "16-1", espnId: 4842716, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4917772.png&w=350&h=254" },
+    { rank: "7", name: "Manel Kape", record: "21-7", espnId: 4373642, photo: "https://a.espncdn.com/i/headshots/mma/players/full/4236504.png" },
+    { rank: "8", name: "Alex Perez", record: "25-9", espnId: 3896306, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3155425.png" },
+    { rank: "9", name: "Asu Almabayev", record: "22-3", espnId: 6314841, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4294926.png&w=350&h=254" },
+    { rank: "10", name: "Steve Erceg", record: "12-4", espnId: 4879192, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4997217.png&w=350&h=254" },
+    { rank: "11", name: "Tim Elliott", record: "20-13-1", espnId: 2989395, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2614020.png&w=350&h=254" },
+    { rank: "12", name: "Tagir Ulanbekov", record: "17-2", espnId: 4713974, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4294924.png&w=350&h=254" },
+    { rank: "13", name: "Ramazan Temirov", record: "19-3", espnId: "", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4895691.png&w=350&h=254" },
+    { rank: "14", name: "Bruno Silva", record: "14-7-2 (1 NC)", espnId: 4233645, photo: "https://a.espncdn.com/i/headshots/mma/players/full/3895544.png" },
+    { rank: "15", name: "Kai Asakura", record: "21-5", espnId: 4334879, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4336757.png&w=350&h=254" }
   ],
   WBW: [
-    { rank: "C", name: "Kayla Harrison", record: "19-1" },
-    { rank: "1", name: "Julianna Peña", record: "12-6" },
-    { rank: "2", name: "Raquel Pennington", record: "16-9" },
-    { rank: "3", name: "Ketlen Vieira", record: "15-4" },
-    { rank: "4", name: "Norma Dumont", record: "12-2" },
-    { rank: "5", name: "Macy Chiasson", record: "11-4" },
-    { rank: "6", name: "Irene Aldana", record: "15-8" },
-    { rank: "7", name: "Ailín Pérez", record: "12-2" },
-    { rank: "8", name: "Mayra Bueno Silva", record: "10-5-1 (1 NC)" },
-    { rank: "9", name: "Yana Santos", record: "16-8 (1 NC)" },
-    { rank: "10", name: "Karol Rosa", record: "18-7" },
-    { rank: "11", name: "Jacqueline Cavalcanti", record: "9-1" },
-    { rank: "12", name: "Nora Cornolle", record: "9-2" },
-    { rank: "13", name: "Miesha Tate", record: "20-10" },
-    { rank: "14", name: "Joselyne Edwards", record: "15-6" },
-    { rank: "15", name: "Dariya Zheleznyakova", record: "10-2" }
+    { rank: "C", name: "Kayla Harrison", record: "19-1", espnId: 4241436, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4241436.png&w=350&h=254" },
+    { rank: "1", name: "Julianna Peña", record: "12-6", espnId: 2990727, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2990727.png&w=350&h=254" },
+    { rank: "2", name: "Raquel Pennington", record: "16-9", espnId: 2563836, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2563836.png&w=350&h=254" },
+    { rank: "3", name: "Ketlen Vieira", record: "15-4", espnId: 4233641, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4233641.png&w=350&h=254" },
+    { rank: "4", name: "Norma Dumont", record: "12-2", espnId: 4878577, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4878577.png&w=350&h=254" },
+    { rank: "5", name: "Macy Chiasson", record: "11-4", espnId: 4243371, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4243371.png&w=350&h=254" },
+    { rank: "6", name: "Irene Aldana", record: "15-8", espnId: 3909477, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3909477.png&w=350&h=254" },
+    { rank: "7", name: "Ailín Pérez", record: "12-2", espnId: 4878950, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4878950.png&w=350&h=254" },
+    { rank: "8", name: "Mayra Bueno Silva", record: "10-5-1 (1 NC)", espnId: 4349679, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4349679.png&w=350&h=254" },
+    { rank: "9", name: "Yana Santos", record: "16-8 (1 NC)", espnId: 4278846, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4278846.png&w=350&h=254" },
+    { rank: "10", name: "Karol Rosa", record: "18-7", espnId: 4278835, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4278835.png&w=350&h=254" },
+    { rank: "11", name: "Jacqueline Cavalcanti", record: "9-1", espnId: "", photo: "" },
+    { rank: "12", name: "Nora Cornolle", record: "9-2", espnId: "", photo: "" },
+    { rank: "13", name: "Miesha Tate", record: "20-10", espnId: 2515572, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2515572.png&w=350&h=254" },
+    { rank: "14", name: "Joselyne Edwards", record: "15-6", espnId: 4422628, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4422628.png&w=350&h=254" },
+    { rank: "15", name: "Dariya Zheleznyakova", record: "10-2", espnId: "", photo: "" }
   ],
   WFLW: [
-    { rank: "C", name: "Valentina Shevchenko", record: "25-4-1" },
-    { rank: "1", name: "Natália Silva", record: "19-5-1" },
-    { rank: "2", name: "Manon Fiorot", record: "12-2" },
-    { rank: "3", name: "Alexa Grasso", record: "16-5-1" },
-    { rank: "4", name: "Erin Blanchfield", record: "13-2" },
-    { rank: "5", name: "Jasmine Jasudavicius", record: "14-3" },
-    { rank: "6", name: "Maycee Barber", record: "14-2" },
-    { rank: "7", name: "Rose Namajunas", record: "14-7" },
-    { rank: "8", name: "Tracy Cortez", record: "12-2" },
-    { rank: "9", name: "Jéssica Andrade", record: "26-14" },
-    { rank: "10", name: "Miranda Maverick", record: "15-6" },
-    { rank: "11", name: "Karine Silva", record: "18-5" },
-    { rank: "12", name: "Casey O'Neill", record: "10-2" },
-    { rank: "13", name: "Wang Cong", record: "8-1" },
-    { rank: "14", name: "JJ Aldrich", record: "14-7" },
-    { rank: "15", name: "Eduarda Moura", record: "12-1" }
+    { rank: "C", name: "Valentina Shevchenko", record: "25-4-1", espnId: 3158323, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3158323.png&w=350&h=254" },
+    { rank: "1", name: "Natália Silva", record: "19-5-1", espnId: 4878583, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4878583.png&w=350&h=254" },
+    { rank: "2", name: "Manon Fiorot", record: "12-2", espnId: 4431456, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4431456.png&w=350&h=254" },
+    { rank: "3", name: "Alexa Grasso", record: "16-5-1", espnId: 3939676, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3939676.png&w=350&h=254" },
+    { rank: "4", name: "Erin Blanchfield", record: "13-2", espnId: 4431454, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4431454.png&w=350&h=254" },
+    { rank: "5", name: "Jasmine Jasudavicius", record: "14-3", espnId: 4878929, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4878929.png&w=350&h=254" },
+    { rank: "6", name: "Maycee Barber", record: "14-2", espnId: 4241441, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4241441.png&w=350&h=254" },
+    { rank: "7", name: "Rose Namajunas", record: "14-7", espnId: 3895886, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3895886.png&w=350&h=254" },
+    { rank: "8", name: "Tracy Cortez", record: "12-2", espnId: 4400145, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4400145.png&w=350&h=254" },
+    { rank: "9", name: "Jéssica Andrade", record: "26-14", espnId: 3896307, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3896307.png&w=350&h=254" },
+    { rank: "10", name: "Miranda Maverick", record: "15-6", espnId: 4431453, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4431453.png&w=350&h=254" },
+    { rank: "11", name: "Karine Silva", record: "18-5", espnId: 4842720, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4842720.png&w=350&h=254" },
+    { rank: "12", name: "Casey O'Neill", record: "10-2", espnId: 4878479, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4878479.png&w=350&h=254" },
+    { rank: "13", name: "Wang Cong", record: "8-1", espnId: "", photo: "" },
+    { rank: "14", name: "JJ Aldrich", record: "14-7", espnId: 3940104, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3940104.png&w=350&h=254" },
+    { rank: "15", name: "Eduarda Moura", record: "12-1", espnId: 6315127, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/6315127.png&w=350&h=254" }
   ],
   WSW: [
-    { rank: "C", name: "Zhang Weili", record: "26-3" },
-    { rank: "1", name: "Virna Jandiroba", record: "22-3" },
-    { rank: "2", name: "Tatiana Suarez", record: "10-1" },
-    { rank: "3", name: "Yan Xiaonan", record: "18-5 (1 NC)" },
-    { rank: "4", name: "Amanda Lemos", record: "15-4-1" },
-    { rank: "5", name: "Jéssica Andrade", record: "26-14" },
-    { rank: "6", name: "Mackenzie Dern", record: "15-5" },
-    { rank: "7", name: "Amanda Ribas", record: "13-6" },
-    { rank: "8", name: "Iasmin Lucindo", record: "17-6" },
-    { rank: "9", name: "Gillian Robertson", record: "16-8" },
-    { rank: "10", name: "Tabatha Ricci", record: "11-3" },
-    { rank: "11", name: "Loopy Godinez", record: "13-5" },
-    { rank: "12", name: "Angela Hill", record: "18-14" },
-    { rank: "13", name: "Tecia Pennington", record: "15-7" },
-    { rank: "14", name: "Loma Lookboonmee", record: "10-3" },
-    { rank: "15", name: "Denise Gomes", record: "11-3" }
+    { rank: "C", name: "Zhang Weili", record: "26-3", espnId: 4305850, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4305850.png&w=350&h=254" },
+    { rank: "1", name: "Virna Jandiroba", record: "22-3", espnId: 4269036, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4269036.png&w=350&h=254" },
+    { rank: "2", name: "Tatiana Suarez", record: "10-1", espnId: 4243373, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4243373.png&w=350&h=254" },
+    { rank: "3", name: "Yan Xiaonan", record: "18-5 (1 NC)", espnId: 4243375, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4243375.png&w=350&h=254" },
+    { rank: "4", name: "Amanda Lemos", record: "15-4-1", espnId: 4713072, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4713072.png&w=350&h=254" },
+    { rank: "5", name: "Jéssica Andrade", record: "26-14", espnId: 3896307, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3896307.png&w=350&h=254" },
+    { rank: "6", name: "Mackenzie Dern", record: "15-5", espnId: 4334877, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4334877.png&w=350&h=254" },
+    { rank: "7", name: "Amanda Ribas", record: "13-7", espnId: 4233629, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4233629.png&w=350&h=254" },
+    { rank: "8", name: "Iasmin Lucindo", record: "17-6", espnId: 4878626, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4878626.png&w=350&h=254" },
+    { rank: "9", name: "Gillian Robertson", record: "16-8", espnId: 4334878, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4334878.png&w=350&h=254" },
+    { rank: "10", name: "Tabatha Ricci", record: "12-3", espnId: 4878593, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4878593.png&w=350&h=254" },
+    { rank: "11", name: "Loopy Godinez", record: "13-5", espnId: 4878574, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4878574.png&w=350&h=254" },
+    { rank: "12", name: "Angela Hill", record: "18-14", espnId: 2991236, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2991236.png&w=350&h=254" },
+    { rank: "13", name: "Tecia Pennington", record: "15-7", espnId: 2999657, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2999657.png&w=350&h=254" },
+    { rank: "14", name: "Loma Lookboonmee", record: "10-3", espnId: 4713076, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4713076.png&w=350&h=254" },
+    { rank: "15", name: "Denise Gomes", record: "11-3", espnId: 4878506, photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4878506.png&w=350&h=254" }
   ]
 };
+// (Paste the full roster arrays here from previous message or use above structure as reference.)
 
-  document.addEventListener('DOMContentLoaded', function() {
-    populateFighters();
-  });
-
-  function populateFighters() {
-    const division = document.getElementById("division").value;
-    const f1 = document.getElementById("fighter1");
-    const f2 = document.getElementById("fighter2");
-    f1.innerHTML = '';
-    f2.innerHTML = '';
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = 'Select a fighter';
-    f1.appendChild(defaultOption.cloneNode(true));
-    f2.appendChild(defaultOption);
-
-    if (!roster[division]) return;
-
-    roster[division].forEach(f => {
-      const opt1 = document.createElement("option");
-      opt1.value = f.name;
-      opt1.text = `${f.rank !== "C" ? '#' + f.rank : 'Champion'} - ${f.name} (${f.record})`;
-      f1.add(opt1.cloneNode(true));
-      f2.add(opt1);
-    });
-  }
-
-  function addFight() {
-    const eventName = document.getElementById("eventName").value;
-    const eventLocation = document.getElementById("eventLocation").value;
-    const eventTime = document.getElementById("eventTime").value;
-    const division = document.getElementById("division").value;
-    const f1Select = document.getElementById("fighter1");
-    const f2Select = document.getElementById("fighter2");
-    const f1Custom = document.getElementById("custom1").value;
-    const f2Custom = document.getElementById("custom2").value;
-    const r1Custom = document.getElementById("record1").value;
-    const r2Custom = document.getElementById("record2").value;
-
-    const f1 = f1Select.value || f1Custom;
-    const f2 = f2Select.value || f2Custom;
-
-    if (!f1 || !f2) {
-      alert("Please select or enter both fighters!");
-      return;
+function getFighterDetails(name, recordOverride, division) {
+  if (roster[division]) {
+    const found = roster[division].find(f => f.name === name);
+    if (found) {
+      return {
+        ...found,
+        photo: found.photo || placeholderImg
+      };
     }
-
-    const poster = document.getElementById("poster");
-
-    if (poster.querySelectorAll('.fight').length === 0) {
-      if (eventName) {
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'event-title';
-        titleDiv.textContent = eventName;
-        poster.appendChild(titleDiv);
-      }
-      if (eventLocation) {
-        const locationDiv = document.createElement('div');
-        locationDiv.className = 'division-name';
-        locationDiv.textContent = eventLocation;
-        poster.appendChild(locationDiv);
-      }
-      if (eventTime) {
-        const timeDiv = document.createElement('div');
-        timeDiv.className = 'division-name';
-        timeDiv.textContent = `Scheduled for: ${new Date(eventTime).toLocaleString()}`;
-        poster.appendChild(timeDiv);
-      }
-    }
-
-    const div = document.createElement("div");
-    div.className = "fight";
-
-    const getFighterDetails = (name, recordOverride) => {
-      return roster[division].find(f => f.name === name) ||
-             { name: name, rank: '', record: recordOverride || '--' };
-    };
-
-    const fighter1 = getFighterDetails(f1, r1Custom);
-    const fighter2 = getFighterDetails(f2, r2Custom);
-
-    const f1Div = document.createElement('div');
-    f1Div.className = 'fighter-info';
-    f1Div.innerHTML = `
-      <span class="fighter-name">
-        ${fighter1.rank ? `<span class="rank-tag">${fighter1.rank === "C" ? 'Champ' : '#'+fighter1.rank}</span>` : ''}
-        ${fighter1.name}
-      </span>
-      <span class="fighter-record">${fighter1.record}</span>
-    `;
-
-    const vsDiv = document.createElement('div');
-    vsDiv.className = 'vs';
-    vsDiv.textContent = 'vs';
-
-    const f2Div = document.createElement('div');
-    f2Div.className = 'fighter-info';
-    f2Div.innerHTML = `
-      <span class="fighter-name">
-        ${fighter2.rank ? `<span class="rank-tag">${fighter2.rank === "C" ? 'Champ' : '#'+fighter2.rank}</span>` : ''}
-        ${fighter2.name}
-      </span>
-      <span class="fighter-record">${fighter2.record}</span>
-    `;
-
-    const divLabel = document.createElement('div');
-    divLabel.className = 'division-name';
-    divLabel.textContent = document.getElementById("division").options[document.getElementById("division").selectedIndex].text;
-
-    div.appendChild(f1Div);
-    div.appendChild(vsDiv);
-    div.appendChild(f2Div);
-    div.appendChild(divLabel);
-
-    poster.appendChild(div);
-
-    // Clear inputs
-    f1Select.value = '';
-    f2Select.value = '';
-    document.getElementById("custom1").value = '';
-    document.getElementById("custom2").value = '';
-    document.getElementById("record1").value = '';
-    document.getElementById("record2").value = '';
   }
+  return {
+    name: name,
+    rank: '',
+    record: recordOverride || '--',
+    photo: placeholderImg
+  };
+}
 
-  function clearPoster() {
-    document.getElementById("poster").innerHTML = '<h2>Event Matchmaking</h2>';
-    document.getElementById("eventName").value = '';
-    document.getElementById("eventLocation").value = '';
-    document.getElementById("eventTime").value = '';
-  }
-
+document.addEventListener('DOMContentLoaded', function() {
+  populateDivisions();
   document.getElementById("division").addEventListener("change", populateFighters);
+  ['event-name', 'event-location', 'event-date', 'event-time'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateEventDetails);
+  });
+  const themeToggle = document.getElementById('theme-toggle');
+  themeToggle.addEventListener('click', function() {
+    document.body.classList.toggle('light-mode');
+    if (document.body.classList.contains('light-mode')) {
+      themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+      themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+  });
+  updateEventDetails();
+});
+
+function populateDivisions() {
+  const divisionSelect = document.getElementById("division");
+  divisionSelect.innerHTML = '';
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = 'Select a division';
+  divisionSelect.appendChild(defaultOption);
+
+  Object.keys(divisionNames).forEach(divCode => {
+    const option = document.createElement('option');
+    option.value = divCode;
+    option.textContent = divisionNames[divCode];
+    divisionSelect.appendChild(option);
+  });
+}
+
+function populateFighters() {
+  const division = document.getElementById("division").value;
+  const f1 = document.getElementById("fighter1");
+  const f2 = document.getElementById("fighter2");
+  
+  f1.innerHTML = '';
+  f2.innerHTML = '';
+  
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = 'Select a fighter';
+  f1.appendChild(defaultOption.cloneNode(true));
+  f2.appendChild(defaultOption.cloneNode(true));
+  
+  if (!roster[division]) return;
+  
+  roster[division].forEach(f => {
+    const opt = document.createElement("option");
+    opt.value = f.name;
+    opt.textContent = `${f.rank === "C" ? 'Champion' : `#${f.rank}`} - ${f.name}`;
+    f1.add(opt.cloneNode(true));
+    f2.add(opt.cloneNode(true));
+  });
+}
+
+function addFight() {
+  const division = document.getElementById("division").value;
+  const fightType = document.getElementById("fight-type").value;
+  const f1Select = document.getElementById("fighter1");
+  const f2Select = document.getElementById("fighter2");
+  const f1Custom = document.getElementById("custom1").value;
+  const f2Custom = document.getElementById("custom2").value;
+  const r1Custom = document.getElementById("record1").value;
+  const r2Custom = document.getElementById("record2").value;
+  
+  const f1 = f1Select.value || f1Custom;
+  const f2 = f2Select.value || f2Custom;
+  
+  if (!f1 || !f2) {
+    alert("Please select or enter both fighters!");
+    return;
+  }
+  
+  document.getElementById("empty-poster").style.display = "none";
+  let containerId;
+  switch(fightType) {
+    case "Main Event":
+    case "Co-Main Event":
+    case "Featured Fight":
+    case "Main Card":
+      containerId = "main-card-container"; break;
+    case "Featured Prelim":
+    case "Prelim":
+      containerId = "prelims-container"; break;
+    case "Early Prelim":
+      containerId = "early-prelims-container"; break;
+    default:
+      containerId = "main-card-container";
+  }
+  const container = document.getElementById(containerId);
+  
+  // Fight card row
+  const fightCard = document.createElement("div");
+  fightCard.className = "fight-card";
+  fightCard.style.display = 'flex';
+  fightCard.style.flexDirection = 'column';
+  fightCard.style.position = "relative";
+
+  // Fight info row
+  const fightRow = document.createElement('div');
+  fightRow.style.display = "flex";
+  fightRow.style.alignItems = "center";
+  fightRow.style.justifyContent = "space-between";
+  
+  // Main Info Block (tier, division, fighters)
+  const mainInfo = document.createElement('div');
+  mainInfo.style.flex = "1";
+  
+  // Tier label
+  const tier = document.createElement("span");
+  tier.className = "fight-tier";
+  tier.textContent = fightType;
+  mainInfo.appendChild(tier);
+  
+  // Division name
+  const divName = document.createElement("div");
+  divName.className = "division-name";
+  divName.textContent = divisionNames[division] || division;
+  mainInfo.appendChild(divName);
+
+  // Fighters row
+  const fd1 = getFighterDetails(f1Select.value, r1Custom, division);
+  const fd2 = getFighterDetails(f2Select.value, r2Custom, division);
+
+  const fightersRow = document.createElement("div");
+  fightersRow.className = "fighters";
+  // Fighter 1
+  const fighter1Div = document.createElement("div");
+  fighter1Div.className = "fighter";
+  fighter1Div.innerHTML = `
+    <div class="fighter-photo"><img src="${fd1.photo}" alt="${fd1.name}"></div>
+    <div class="fighter-name">${fd1.name || f1Custom}</div>
+    <div class="fighter-details">${fd1.record || r1Custom}</div>
+    ${fd1.rank ? `<span class="rank-tag">${fd1.rank === 'C' ? 'Champ' : `#${fd1.rank}`}</span>` : ''}
+  `;
+  // VS
+  const vsDiv = document.createElement("div");
+  vsDiv.className = "vs";
+  vsDiv.textContent = "VS";
+  // Fighter 2
+  const fighter2Div = document.createElement("div");
+  fighter2Div.className = "fighter";
+  fighter2Div.innerHTML = `
+    <div class="fighter-photo"><img src="${fd2.photo}" alt="${fd2.name}"></div>
+    <div class="fighter-name">${fd2.name || f2Custom}</div>
+    <div class="fighter-details">${fd2.record || r2Custom}</div>
+    ${fd2.rank ? `<span class="rank-tag">${fd2.rank === 'C' ? 'Champ' : `#${fd2.rank}`}</span>` : ''}
+  `;
+  fightersRow.appendChild(fighter1Div);
+  fightersRow.appendChild(vsDiv);
+  fightersRow.appendChild(fighter2Div);
+  mainInfo.appendChild(fightersRow);
+
+  // Move Delete button to far right, vertically centered
+  const delBtn = document.createElement("button");
+  delBtn.className = "delete-btn";
+  delBtn.innerHTML = '<i class="fas fa-times"></i>';
+  delBtn.onclick = function() { fightCard.remove(); };
+  delBtn.style.position = "static";
+  delBtn.style.marginLeft = "18px";
+  delBtn.style.alignSelf = "center";
+  delBtn.style.background = "#444";
+  delBtn.style.color = "#fff";
+  delBtn.style.width = "32px";
+  delBtn.style.height = "32px";
+  delBtn.style.borderRadius = "50%";
+  delBtn.style.fontSize = "1.15em";
+  delBtn.style.border = "none";
+  delBtn.style.transition = "background 0.2s";
+  delBtn.onmouseover = () => delBtn.style.background = "#d20a0f";
+  delBtn.onmouseout = () => delBtn.style.background = "#444";
+
+  fightRow.appendChild(mainInfo);
+  fightRow.appendChild(delBtn);
+  fightCard.appendChild(fightRow);
+
+  container.appendChild(fightCard);
+}
+
+function updateEventDetails() {
+  const title = document.getElementById("event-name").value || "UFC: Championship Night";
+  const loc = document.getElementById("event-location").value;
+  const date = document.getElementById("event-date").value;
+  const time = document.getElementById("event-time").value;
+  document.getElementById("event-title").textContent = title;
+  let details = [];
+  if (loc) details.push(loc);
+  if (date) details.push(date);
+  if (time) details.push(time);
+  document.getElementById("event-details").textContent = details.join(" • ");
+}
 </script>
 </body>
 </html>
