@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UFC Matchmaking Tool</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -52,7 +53,12 @@
             margin-top: 10px;
         }
         
-        .theme-btn {
+        .header-controls {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .theme-btn, .export-btn {
             background: #222;
             border: 2px solid #444;
             color: #fff;
@@ -67,9 +73,19 @@
             transition: all 0.3s ease;
         }
         
+        .export-btn {
+            font-size: 1.4rem;
+            background: #1a5e1a;
+        }
+        
         .theme-btn:hover {
             background: #333;
             transform: rotate(15deg);
+        }
+        
+        .export-btn:hover {
+            background: #1f7a1f;
+            transform: scale(1.1);
         }
         
         .main-content {
@@ -336,6 +352,80 @@
             padding-left: 15px;
         }
         
+        /* Export overlay */
+        .export-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .export-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .export-content {
+            background: #222;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+        }
+        
+        .export-preview {
+            max-width: 100%;
+            max-height: 60vh;
+            border: 3px solid #d10a11;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .export-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .export-btn-action {
+            background: linear-gradient(to right, #d10a11, #b0080e);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .export-btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(209, 10, 17, 0.4);
+        }
+        
+        .export-btn-action.cancel {
+            background: #444;
+        }
+        
+        .export-btn-action.cancel:hover {
+            background: #555;
+        }
+        
         /* Light mode styles */
         .light-mode {
             background: linear-gradient(135deg, #f0f2f5 0%, #e2e6f0 100%);
@@ -423,6 +513,16 @@
             .event-title {
                 font-size: 1.9rem;
             }
+            
+            .header-controls {
+                gap: 10px;
+            }
+            
+            .theme-btn, .export-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
@@ -433,7 +533,14 @@
                 <h1>UFC Matchmaking Tool</h1>
                 <p>Create your dream UFC fight cards with ranked and unranked fighters from all divisions</p>
             </div>
-            <button id="theme-toggle" class="theme-btn"><i class="fas fa-moon"></i></button>
+            <div class="header-controls">
+                <button id="export-btn" class="export-btn" title="Export Event Poster">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <button id="theme-toggle" class="theme-btn" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
         </div>
         
         <div class="main-content">
@@ -517,11 +624,12 @@
                     <p>3. Choose fight type (Main Card, Prelims, etc.)</p>
                     <p>4. Click "Add Fight to Card"</p>
                     <p>5. Customize event details</p>
-                    <p>6. Toggle between dark/light mode using the moon button</p>
+                    <p>6. Export your fight card as an image</p>
+                    <p>7. Toggle between dark/light mode using the buttons</p>
                 </div>
             </div>
             
-            <div class="event-poster">
+            <div class="event-poster" id="event-poster">
                 <h2 class="event-title" id="event-title">UFC: Championship Night</h2>
                 <div id="event-details" class="event-details">Las Vegas, NV | July 15, 2024 | 7:00 PM</div>
                 
@@ -537,6 +645,23 @@
                     
                     <div id="empty-poster" class="empty-poster">No fights added yet. Start building your event card!</div>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Overlay -->
+    <div class="export-overlay" id="export-overlay">
+        <div class="export-content">
+            <h2>Export Event Poster</h2>
+            <p>Preview your event poster before downloading</p>
+            <img id="export-preview" class="export-preview" src="" alt="Event Poster Preview">
+            <div class="export-actions">
+                <button class="export-btn-action" id="download-btn">
+                    <i class="fas fa-download"></i> Download Image
+                </button>
+                <button class="export-btn-action cancel" id="cancel-export">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
             </div>
         </div>
     </div>
@@ -576,7 +701,6 @@
                 { rank: "13", name: "Mick Parkin", record: "10-1", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/5060505.png&w=350&h=254" },
                 { rank: "14", name: "Tallison Teixeira", record: "8-1", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/5212856.png&w=350&h=254" },
                 { rank: "15", name: "Rizvan Kuniev", record: "12-3-1 (1 NC)", photo: "https://a.espncdn.com/i/headshots/mma/players/full/4001837.png" },
-                // Unranked fighters
                 { rank: "NR", name: "Chris Barnett", record: "23-9", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2960757.png&w=350&h=254" },
                 { rank: "NR", name: "Hamdy Abdelwahab", record: "6-1 (1 NC)", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/5078213.png&w=350&h=254" },
                 { rank: "NR", name: "Mohammed Usman", record: "11-4", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2312150.png&w=350&h=254" },
@@ -592,7 +716,6 @@
                 { rank: "NR", name: "Vitor Petrino", record: "14-2", photo: "https://a.espncdn.com/i/headshots/mma/players/full/5060483.png" },
                 { rank: "NR", name: "Kennedy Nzechukwu", record: "12-5", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4245094.png&w=350&h=254" },
                 { rank: "NR", name: "Ryan Spann", record: "22-10", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3887606.png&w=350&h=254" }
-
             ],
             
             LHW: [
@@ -612,7 +735,6 @@
                 { rank: "13", name: "Johnny Walker", record: "21-9 (1 NC)", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3146944.png&w=350&h=254" },
                 { rank: "14", name: "Zhang Mingyang", record: "19-6", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4845284.png&w=350&h=254" },
                 { rank: "15", name: "Alonzo Menifield", record: "17-5-1", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3948876.png&w=350&h=254" },
-                // Unranked fighters
                 { rank: "NR", name: "Billy Elekana", record: "7-2", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/5078114.png&w=350&h=254" },
                 { rank: "NR", name: "Ibo Aslan", record: "14-2", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4684240.png&w=350&h=254" },
                 { rank: "NR", name: "Brendson Ribeiro", record: "17-8", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4379328.png&w=350&h=254" },
@@ -628,11 +750,9 @@
                 { rank: "NR", name: "Modestas Bukauskas", record: "15-6", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4279621.png&w=350&h=254" },
                 { rank: "NR", name: "Nicolae Negumereanu", record: "13-3", photo: "https://a.espncdn.com/i/headshots/mma/players/full/4417235.png" },
                 { rank: "NR", name: "Antonio Trocoli", record: "12-5 (1 NC)", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3955820.png&w=350&h=254" },
-                { rank: "NR", name: "Junior Tafa", record: "4-3", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/5122234.png&w=350&h=254" },
                 { rank: "NR", name: "Tuco Tokkos", record: "12-4", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4410698.png&w=350&h=254" },
                 { rank: "NR", name: "Rafael Cerqueira", record: "8-2", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/5212598.png&w=350&h=254" },
                 { rank: "NR", name: "Navajo Stirling", record: "12-4", photo: "https://a.espncdn.com/i/headshots/mma/players/full/5216713.png" }
-
             ],
             
             MW: [
@@ -652,7 +772,6 @@
                 { rank: "13", name: "Marvin Vettori", record: "19-9-1", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4001851.png&w=350&h=254" },
                 { rank: "14", name: "Abusupiyan Magomedov", record: "28-6-1", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3077822.png&w=350&h=254" },
                 { rank: "15", name: "Roman Kopylov", record: "14-4", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4300149.png&w=350&h=254" },
-                // Unranked fighters
                 { rank: "NR", name: "Brad Tavares", record: "21-10", photo: placeholderImg },
                 { rank: "NR", name: "Kelvin Gastelum", record: "19-10 (1 NC)", photo: placeholderImg },
                 { rank: "NR", name: "Jack Hermansson", record: "24-9", photo: placeholderImg },
@@ -668,20 +787,7 @@
                 { rank: "NR", name: "André Muniz", record: "24-7", photo: placeholderImg },
                 { rank: "NR", name: "Duško Todorovič", record: "12-6", photo: placeholderImg },
                 { rank: "NR", name: "Jacob Malkoun", record: "8-3", photo: placeholderImg },
-                { rank: "NR", name: "Dustin Stoltzfus", record: "16-7", photo: placeholderImg },
-                { rank: "NR", name: "Gregory Rodrigues", record: "17-6", photo: placeholderImg },
-                { rank: "NR", name: "Andre Petroski", record: "13-4", photo: placeholderImg },
-                { rank: "NR", name: "Cody Brundage", record: "11-7 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Chris Curtis", record: "31-12 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Tresean Gore", record: "5-3", photo: placeholderImg },
-                { rank: "NR", name: "Allaskhab Khizriev", record: "14-0 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Joe Pyfer", record: "14-3", photo: placeholderImg },
-                { rank: "NR", name: "Brunno Ferreira", record: "13-2", photo: placeholderImg },
-                { rank: "NR", name: "Bo Nickal", record: "7-1", photo: placeholderImg },
-                { rank: "NR", name: "Sedriques Dumas", record: "10-3", photo: placeholderImg },
-                { rank: "NR", name: "Christian Leroy Duncan", record: "11-2", photo: placeholderImg },
-                { rank: "NR", name: "Ikram Aliskerov", record: "16-2", photo: placeholderImg },
-                { rank: "NR", name: "Nursulton Ruziboev", record: "36-9-2 (2 NC)", photo: placeholderImg }
+                { rank: "NR", name: "Dustin Stoltzfus", record: "16-7", photo: placeholderImg }
             ],
             
             WW: [
@@ -701,7 +807,6 @@
                 { rank: "13", name: "Gabriel Bonfim", record: "18-1", photo: "https://a.espncdn.com/i/headshots/mma/players/full/4921516.png" },
                 { rank: "14", name: "Daniel Rodriguez", record: "20-5", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4426312.png&w=350&h=254" },
                 { rank: "15", name: "Michael Page", record: "23-3", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3022067.png&w=350&h=254" },
-                // Unranked fighters
                 { rank: "NR", name: "Rafael dos Anjos", record: "32-17", photo: placeholderImg },
                 { rank: "NR", name: "Court McGee", record: "22-14", photo: placeholderImg },
                 { rank: "NR", name: "Stephen Thompson", record: "17-8-1", photo: placeholderImg },
@@ -716,49 +821,7 @@
                 { rank: "NR", name: "Mickey Gall", record: "7-7", photo: placeholderImg },
                 { rank: "NR", name: "Max Griffin", record: "20-11", photo: placeholderImg },
                 { rank: "NR", name: "Niko Price", record: "16-9 (2 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Trevin Giles", record: "16-7", photo: placeholderImg },
-                { rank: "NR", name: "Song Kenan", record: "22-9", photo: placeholderImg },
-                { rank: "NR", name: "Muslim Salikhov", record: "21-5", photo: placeholderImg },
-                { rank: "NR", name: "Kevin Holland", record: "28-13 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Wellington Turman", record: "18-8", photo: placeholderImg },
-                { rank: "NR", name: "Punahele Soriano", record: "11-4", photo: placeholderImg },
-                { rank: "NR", name: "Khaos Williams", record: "15-5", photo: placeholderImg },
-                { rank: "NR", name: "Rhys McKee", record: "14-6-1", photo: placeholderImg },
-                { rank: "NR", name: "Ramiz Brahimaj", record: "12-5", photo: placeholderImg },
-                { rank: "NR", name: "Philip Rowe", record: "11-5", photo: placeholderImg },
-                { rank: "NR", name: "Uroš Medić", record: "10-3", photo: placeholderImg },
-                { rank: "NR", name: "Carlston Harris", record: "19-7", photo: placeholderImg },
-                { rank: "NR", name: "Jeremiah Wells", record: "12-4-1", photo: placeholderImg },
-                { rank: "NR", name: "Preston Parsons", record: "11-6", photo: placeholderImg },
-                { rank: "NR", name: "Bryan Battle", record: "12-2 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Gilbert Urbina", record: "7-3", photo: placeholderImg },
-                { rank: "NR", name: "Pete Rodriguez", record: "5-2", photo: placeholderImg },
-                { rank: "NR", name: "Chidi Njokuani", record: "25-10 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Mike Malott", record: "12-2-1", photo: placeholderImg },
-                { rank: "NR", name: "Ange Loosa", record: "10-5 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Rinat Fakhretdinov", record: "24-2-1", photo: placeholderImg },
-                { rank: "NR", name: "Adam Fugitt", record: "10-4", photo: placeholderImg },
-                { rank: "NR", name: "Yusaku Kinoshita", record: "6-3", photo: placeholderImg },
-                { rank: "NR", name: "Francisco Prado", record: "12-3", photo: placeholderImg },
-                { rank: "NR", name: "Themba Gorimbo", record: "14-5", photo: placeholderImg },
-                { rank: "NR", name: "Sam Patterson", record: "13-2-1", photo: placeholderImg },
-                { rank: "NR", name: "Trey Waters", record: "9-1", photo: placeholderImg },
-                { rank: "NR", name: "Bassil Hafez", record: "9-5-1", photo: placeholderImg },
-                { rank: "NR", name: "Jonny Parsons", record: "9-3", photo: placeholderImg },
-                { rank: "NR", name: "Darrius Flowers", record: "12-8-1", photo: placeholderImg },
-                { rank: "NR", name: "Billy Ray Goff", record: "9-4", photo: placeholderImg },
-                { rank: "NR", name: "Kiefer Crosbie", record: "10-5", photo: placeholderImg },
-                { rank: "NR", name: "Charlie Radtke", record: "10-5", photo: placeholderImg },
-                { rank: "NR", name: "Oban Elliott", record: "12-3", photo: placeholderImg },
-                { rank: "NR", name: "Danny Barlow", record: "9-1", photo: placeholderImg },
-                { rank: "NR", name: "Nikolay Veretennikov", record: "12-6", photo: placeholderImg },
-                { rank: "NR", name: "Carlos Leal Miranda", record: "22-6", photo: placeholderImg },
-                { rank: "NR", name: "Jacobe Smith", record: "11-0", photo: placeholderImg },
-                { rank: "NR", name: "Jonathan Micallef", record: "8-1", photo: placeholderImg },
-                { rank: "NR", name: "Austin Vanderford", record: "13-2", photo: placeholderImg },
-                { rank: "NR", name: "Daniel Frunza", record: "9-3", photo: placeholderImg },
-                { rank: "NR", name: "Andreas Gustafsson", record: "12-2", photo: placeholderImg },
-                { rank: "NR", name: "Ko Seok-hyun", record: "12-2", photo: placeholderImg }
+                { rank: "NR", name: "Trevin Giles", record: "16-7", photo: placeholderImg }
             ],
             
             LW: [
@@ -778,7 +841,6 @@
                 { rank: "13", name: "Benoît Saint Denis", record: "14-3 (1 NC)", photo: "https://a.espncdn.com/i/headshots/mma/players/full/4895362.png" },
                 { rank: "14", name: "Grant Dawson", record: "23-2-1", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3931156.png&w=350&h=254" },
                 { rank: "15", name: "Joel Álvarez", record: "22-3", photo: "https://a.espncdn.com/i/headshots/mma/players/full/4411888.png" },
-                // Unranked fighters
                 { rank: "NR", name: "Jim Miller", record: "38-19 (1 NC)", photo: placeholderImg },
                 { rank: "NR", name: "Jeremy Stephens", record: "29-22 (1 NC)", photo: placeholderImg },
                 { rank: "NR", name: "Michael Johnson", record: "23-19", photo: placeholderImg },
@@ -793,67 +855,7 @@
                 { rank: "NR", name: "Lando Vannata", record: "12-7-2", photo: placeholderImg },
                 { rank: "NR", name: "Alex Reyes", record: "13-5", photo: placeholderImg },
                 { rank: "NR", name: "Nasrat Happarast", record: "18-5", photo: placeholderImg },
-                { rank: "NR", name: "Matt Frevola", record: "11-5-1", photo: placeholderImg },
-                { rank: "NR", name: "Alexander Hernandez", record: "16-8", photo: placeholderImg },
-                { rank: "NR", name: "Thiago Moisés", record: "19-9", photo: placeholderImg },
-                { rank: "NR", name: "Sodiq Yusuff", record: "13-5", photo: placeholderImg },
-                { rank: "NR", name: "Mike Davis", record: "11-3", photo: placeholderImg },
-                { rank: "NR", name: "Austin Hubbard", record: "16-9", photo: placeholderImg },
-                { rank: "NR", name: "Farès Ziam", record: "17-4", photo: placeholderImg },
-                { rank: "NR", name: "Jamie Mullarkey", record: "17-8", photo: placeholderImg },
-                { rank: "NR", name: "Ottman Azaitar", record: "13-3", photo: placeholderImg },
-                { rank: "NR", name: "Brad Riddell", record: "10-4", photo: placeholderImg },
-                { rank: "NR", name: "Chase Hooper", record: "16-3-1", photo: placeholderImg },
-                { rank: "NR", name: "Gabriel Green", record: "12-5", photo: placeholderImg },
-                { rank: "NR", name: "Jai Herbert", record: "13-6-1", photo: placeholderImg },
-                { rank: "NR", name: "Ludovit Klein", record: "23-5-1", photo: placeholderImg },
-                { rank: "NR", name: "Rafa Garcia", record: "16-4", photo: placeholderImg },
-                { rank: "NR", name: "Ignacio Bahamondes", record: "17-6", photo: placeholderImg },
-                { rank: "NR", name: "Rong Zhu", record: "26-6", photo: placeholderImg },
-                { rank: "NR", name: "Kyle Prepolec", record: "18-9", photo: placeholderImg },
-                { rank: "NR", name: "Terrance McKinney", record: "17-7", photo: placeholderImg },
-                { rank: "NR", name: "Mason Jones", record: "15-3 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Viacheslav Borshchev", record: "8-6-1", photo: placeholderImg },
-                { rank: "NR", name: "Nikolas Motta", record: "15-6 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Trey Ogden", record: "17-7 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Evan Elder", record: "10-2", photo: placeholderImg },
-                { rank: "NR", name: "Manuel Torres", record: "16-3", photo: placeholderImg },
-                { rank: "NR", name: "Hayisaer Maheshate", record: "10-4", photo: placeholderImg },
-                { rank: "NR", name: "Daniel Zellhuber", record: "15-2", photo: placeholderImg },
-                { rank: "NR", name: "Mateusz Rebecki", record: "20-2", photo: placeholderImg },
-                { rank: "NR", name: "Ismael Bonfim", record: "20-5", photo: placeholderImg },
-                { rank: "NR", name: "Anshul Jubli", record: "7-2", photo: placeholderImg },
-                { rank: "NR", name: "Elves Brener", record: "16-5", photo: placeholderImg },
-                { rank: "NR", name: "Nazim Sadykhov", record: "11-1-1", photo: placeholderImg },
-                { rank: "NR", name: "Nurullo Aliev", record: "9-0", photo: placeholderImg },
-                { rank: "NR", name: "Victor Martinez", record: "13-6", photo: placeholderImg },
-                { rank: "NR", name: "Trevor Peek", record: "9-3 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Esteban Ribovics", record: "14-2", photo: placeholderImg },
-                { rank: "NR", name: "Loik Radzhabov", record: "18-5-1", photo: placeholderImg },
-                { rank: "NR", name: "Yanal Ashmouz", record: "8-2", photo: placeholderImg },
-                { rank: "NR", name: "Chris Duncan", record: "13-1", photo: placeholderImg },
-                { rank: "NR", name: "Rolando Bedoya", record: "14-4", photo: placeholderImg },
-                { rank: "NR", name: "Dennis Buzukja", record: "12-5", photo: placeholderImg },
-                { rank: "NR", name: "Charlie Campbell", record: "9-2", photo: placeholderImg },
-                { rank: "NR", name: "Mohammad Yahya", record: "12-5", photo: placeholderImg },
-                { rank: "NR", name: "Kauê Fernandes", record: "10-2", photo: placeholderImg },
-                { rank: "NR", name: "Myktybek Oroibai", record: "14-2-1", photo: placeholderImg },
-                { rank: "NR", name: "Tom Nolan", record: "9-1", photo: placeholderImg },
-                { rank: "NR", name: "MarQuel Mederos", record: "11-1", photo: placeholderImg },
-                { rank: "NR", name: "Bolaji Oki", record: "10-2", photo: placeholderImg },
-                { rank: "NR", name: "Abdul-Kareem Al-Selwady", record: "15-4", photo: placeholderImg },
-                { rank: "NR", name: "Mitch Ramirez", record: "8-2", photo: placeholderImg },
-                { rank: "NR", name: "Chris Padilla", record: "16-6", photo: placeholderImg },
-                { rank: "NR", name: "Maurício Ruffy", record: "12-1", photo: placeholderImg },
-                { rank: "NR", name: "Jordan Vucenic", record: "13-4", photo: placeholderImg },
-                { rank: "NR", name: "Mairon Santos", record: "16-1", photo: placeholderImg },
-                { rank: "NR", name: "Quillan Salkilld", record: "9-1", photo: placeholderImg },
-                { rank: "NR", name: "Kody Steele", record: "7-1", photo: placeholderImg },
-                { rank: "NR", name: "Gauge Young", record: "9-3", photo: placeholderImg },
-                { rank: "NR", name: "Matheus Camilo", record: "9-3", photo: placeholderImg },
-                { rank: "NR", name: "Michael Aswell", record: "10-3", photo: placeholderImg },
-                { rank: "NR", name: "Mark Choinski", record: "7-1", photo: placeholderImg },
-                { rank: "NR", name: "Tofiq Musayev", record: "22-6", photo: placeholderImg }
+                { rank: "NR", name: "Matt Frevola", record: "11-5-1", photo: placeholderImg }
             ],
             
             FW: [
@@ -873,7 +875,6 @@
                 { rank: "13", name: "David Onama", record: "14-2", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4897850.png&w=350&h=254" },
                 { rank: "14", name: "Dan Ige", record: "19-10", photo: "https://a.espncdn.com/i/headshots/mma/players/full/4074001.png" },
                 { rank: "15", name: "Giga Chikadze", record: "15-5", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3957071.png&w=350&h=254" },
-                // Unranked fighters
                 { rank: "NR", name: "Cub Swanson", record: "30-14", photo: placeholderImg },
                 { rank: "NR", name: "Darren Elkins", record: "29-12", photo: placeholderImg },
                 { rank: "NR", name: "Andre Fili", record: "24-12 (1 NC)", photo: placeholderImg },
@@ -883,51 +884,7 @@
                 { rank: "NR", name: "Gavin Tucker", record: "13-3", photo: placeholderImg },
                 { rank: "NR", name: "Calvin Kattar", record: "23-8", photo: placeholderImg },
                 { rank: "NR", name: "Nathaniel Wood", record: "22-6", photo: placeholderImg },
-                { rank: "NR", name: "Bryce Mitchell", record: "17-3", photo: placeholderImg },
-                { rank: "NR", name: "Julian Erosa", record: "31-12", photo: placeholderImg },
-                { rank: "NR", name: "Chris Gutiérrez", record: "22-6-2", photo: placeholderImg },
-                { rank: "NR", name: "Kyle Nelson", record: "16-6-1", photo: placeholderImg },
-                { rank: "NR", name: "Miles Johns", record: "15-3 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Sean Woodson", record: "13-2-1", photo: placeholderImg },
-                { rank: "NR", name: "Billy Quarantillo", record: "18-7", photo: placeholderImg },
-                { rank: "NR", name: "Nate Landwehr", record: "18-6", photo: placeholderImg },
-                { rank: "NR", name: "Jamall Emmers", record: "21-8", photo: placeholderImg },
-                { rank: "NR", name: "John Castañeda", record: "21-8", photo: placeholderImg },
-                { rank: "NR", name: "Pat Sabatini", record: "20-5", photo: placeholderImg },
-                { rank: "NR", name: "Shayilan Nuerdanbieke", record: "39-12", photo: placeholderImg },
-                { rank: "NR", name: "Melsik Baghdasaryan", record: "8-3", photo: placeholderImg },
-                { rank: "NR", name: "Joanderson Brito", record: "17-5-1", photo: placeholderImg },
-                { rank: "NR", name: "Christian Rodriguez", record: "12-3", photo: placeholderImg },
-                { rank: "NR", name: "Daniel Santos", record: "12-2", photo: placeholderImg },
-                { rank: "NR", name: "Lucas Almeida", record: "15-4", photo: placeholderImg },
-                { rank: "NR", name: "William Gomis", record: "14-3", photo: placeholderImg },
-                { rank: "NR", name: "Francis Marshall", record: "8-3", photo: placeholderImg },
-                { rank: "NR", name: "Erik Silva", record: "9-3", photo: placeholderImg },
-                { rank: "NR", name: "Melquizael Costa", record: "24-7", photo: placeholderImg },
-                { rank: "NR", name: "Lee Jeong-yeong", record: "11-2", photo: placeholderImg },
-                { rank: "NR", name: "Jeka Saragih", record: "14-5", photo: placeholderImg },
-                { rank: "NR", name: "Farid Basharat", record: "13-0", photo: placeholderImg },
-                { rank: "NR", name: "Gabriel Santos", record: "12-2", photo: placeholderImg },
-                { rank: "NR", name: "Fernando Padilla", record: "16-6", photo: placeholderImg },
-                { rank: "NR", name: "Muhammad Naimov", record: "13-3", photo: placeholderImg },
-                { rank: "NR", name: "Chepe Mariscal", record: "18-6", photo: placeholderImg },
-                { rank: "NR", name: "Westin Wilson", record: "17-9", photo: placeholderImg },
-                { rank: "NR", name: "Isaac Dulgarian", record: "7-1", photo: placeholderImg },
-                { rank: "NR", name: "Morgan Charrière", record: "20-11-1", photo: placeholderImg },
-                { rank: "NR", name: "Manolo Zecchini", record: "11-4", photo: placeholderImg },
-                { rank: "NR", name: "Hyder Amil", record: "11-1", photo: placeholderImg },
-                { rank: "NR", name: "Timothy Cuamba", record: "9-3", photo: placeholderImg },
-                { rank: "NR", name: "Danny Silva", record: "10-1", photo: placeholderImg },
-                { rank: "NR", name: "Steven Nguyen", record: "9-2", photo: placeholderImg },
-                { rank: "NR", name: "Kaan Ofli", record: "11-4-1", photo: placeholderImg },
-                { rank: "NR", name: "Roberto Romero", record: "8-5-1", photo: placeholderImg },
-                { rank: "NR", name: "Yi Zha", record: "25-5", photo: placeholderImg },
-                { rank: "NR", name: "Austin Bashi", record: "13-1", photo: placeholderImg },
-                { rank: "NR", name: "Bogdan Grad", record: "15-3", photo: placeholderImg },
-                { rank: "NR", name: "Jose Delgado", record: "10-1", photo: placeholderImg },
-                { rank: "NR", name: "Kevin Vallejos", record: "15-1", photo: placeholderImg },
-                { rank: "NR", name: "Yadier del Valle", record: "8-0", photo: placeholderImg },
-                { rank: "NR", name: "Yoo Joo-sang", record: "9-0", photo: placeholderImg }
+                { rank: "NR", name: "Bryce Mitchell", record: "17-3", photo: placeholderImg }
             ],
             
             BW: [
@@ -947,7 +904,6 @@
                 { rank: "13", name: "Marcus McGhee", record: "10-2", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4895760.png&w=350&h=254" },
                 { rank: "14", name: "Kyler Phillips", record: "12-4", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4237015.png&w=350&h=254" },
                 { rank: "15", name: "Montel Jackson", record: "15-2", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4339130.png&w=350&h=254" },
-                // Unranked fighters
                 { rank: "NR", name: "Rani Yahya", record: "28-12-1 (1 NC)", photo: placeholderImg },
                 { rank: "NR", name: "Tim Elliott", record: "19-14-1", photo: placeholderImg },
                 { rank: "NR", name: "Davey Grant", record: "16-7", photo: placeholderImg },
@@ -957,58 +913,7 @@
                 { rank: "NR", name: "Cody Garbrandt", record: "14-7", photo: placeholderImg },
                 { rank: "NR", name: "Ricky Simón", record: "22-6", photo: placeholderImg },
                 { rank: "NR", name: "Raoni Barcelos", record: "20-5", photo: placeholderImg },
-                { rank: "NR", name: "Said Nurmagomedov", record: "18-4", photo: placeholderImg },
-                { rank: "NR", name: "Jonathan Martinez", record: "19-6", photo: placeholderImg },
-                { rank: "NR", name: "Vince Morales", record: "16-10", photo: placeholderImg },
-                { rank: "NR", name: "Charles Jourdain", record: "16-8-1", photo: placeholderImg },
-                { rank: "NR", name: "Alateng Heili", record: "17-10-2", photo: placeholderImg },
-                { rank: "NR", name: "Adrian Yafiez", record: "17-6", photo: placeholderImg },
-                { rank: "NR", name: "Cody Durden", record: "17-8-1", photo: placeholderImg },
-                { rank: "NR", name: "Aori Qileng", record: "25-12 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Kris Moutinho", record: "14-7", photo: placeholderImg },
-                { rank: "NR", name: "Ricky Turcios", record: "12-5", photo: placeholderImg },
-                { rank: "NR", name: "Brady Hiestand", record: "8-2", photo: placeholderImg },
-                { rank: "NR", name: "Salmon Oliveira", record: "18-6", photo: placeholderImg },
-                { rank: "NR", name: "Victor Henry", record: "25-7 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Chad Anheliger", record: "13-8", photo: placeholderImg },
-                { rank: "NR", name: "Javid Basharat", record: "14-2 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Garrett Armfield", record: "10-5", photo: placeholderImg },
-                { rank: "NR", name: "Da’Mon Blackshear", record: "17-7-1", photo: placeholderImg },
-                { rank: "NR", name: "Cristian Quiñónez", record: "18-5", photo: placeholderImg },
-                { rank: "NR", name: "Cameron Saaiman", record: "9-3", photo: placeholderImg },
-                { rank: "NR", name: "Steven Koslow", record: "6-1", photo: placeholderImg },
-                { rank: "NR", name: "Raul Rosas Jr.", record: "11-1", photo: placeholderImg },
-                { rank: "NR", name: "Daniel Marcos", record: "17-1 (1 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Luan Lacerda", record: "12-3", photo: placeholderImg },
-                { rank: "NR", name: "Rinya Nakamura", record: "9-1", photo: placeholderImg },
-                { rank: "NR", name: "Toshiorni Kazama", record: "11-4", photo: placeholderImg },
-                { rank: "NR", name: "Gaston Bolafios", record: "8-5", photo: placeholderImg },
-                { rank: "NR", name: "Muin Gafurov", record: "20-6", photo: placeholderImg },
-                { rank: "NR", name: "Payton Talbott", record: "10-1", photo: placeholderImg },
-                { rank: "NR", name: "Serhiy Sidey", record: "12-2", photo: placeholderImg },
-                { rank: "NR", name: "Ramon Taveras", record: "10-3", photo: placeholderImg },
-                { rank: "NR", name: "Carlos Vera", record: "12-4", photo: placeholderImg },
-                { rank: "NR", name: "AJ Cunningham", record: "11-5", photo: placeholderImg },
-                { rank: "NR", name: "Bernardo Sopaj", record: "12-3", photo: placeholderImg },
-                { rank: "NR", name: "Bekzat Almakhan", record: "12-2", photo: placeholderImg },
-                { rank: "NR", name: "Angel Pacheco", record: "7-3", photo: placeholderImg },
-                { rank: "NR", name: "Jean Matsumoto", record: "16-1", photo: placeholderImg },
-                { rank: "NR", name: "Felipe Lima", record: "14-2", photo: placeholderImg },
-                { rank: "NR", name: "Lee Chang-ho", record: "11-1", photo: placeholderImg },
-                { rank: "NR", name: "Xiao Long", record: "27-9", photo: placeholderImg },
-                { rank: "NR", name: "Quang Le", record: "9-2", photo: placeholderImg },
-                { rank: "NR", name: "Nathan Fletcher", record: "9-2", photo: placeholderImg },
-                { rank: "NR", name: "Cody Haddon", record: "8-1", photo: placeholderImg },
-                { rank: "NR", name: "Cameron Smotherman", record: "12-6", photo: placeholderImg },
-                { rank: "NR", name: "Jielejisi Baergeng", record: "18-6", photo: placeholderImg },
-                { rank: "NR", name: "You Su-young", record: "15-3 (2 NC)", photo: placeholderImg },
-                { rank: "NR", name: "Colby Thicknesse", record: "7-1", photo: placeholderImg },
-                { rank: "NR", name: "Aleksandre Topuria", record: "6-1", photo: placeholderImg },
-                { rank: "NR", name: "Elijah Smith", record: "8-1", photo: placeholderImg },
-                { rank: "NR", name: "Josias Musasa", record: "8-1", photo: placeholderImg },
-                { rank: "NR", name: "David Martinez", record: "12-1", photo: placeholderImg },
-                { rank: "NR", name: "Malcolm Wellmaker", record: "10-0", photo: placeholderImg },
-                { rank: "NR", name: "Patchy Mix", record: "20-2", photo: placeholderImg }
+                { rank: "NR", name: "Said Nurmagomedov", record: "18-4", photo: placeholderImg }
             ],
             
             FLW: [
@@ -1028,7 +933,6 @@
                 { rank: "13", name: "Ramazan Temirov", record: "19-3", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4895691.png&w=350&h=254" },
                 { rank: "14", name: "Bruno Silva", record: "14-7-2 (1 NC)", photo: "https://a.espncdn.com/i/headshots/mma/players/full/3895544.png" },
                 { rank: "15", name: "Kai Asakura", record: "21-5", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4336757.png&w=350&h=254" },
-                // Unranked fighters
                 { rank: "NR", name: "Matt Schnell", record: "17-9 (1 NC)", photo: placeholderImg },
                 { rank: "NR", name: "Su Mudaerji", record: "17-7", photo: placeholderImg },
                 { rank: "NR", name: "Ode’ Osbourne", record: "13-8 (1 NC)", photo: placeholderImg },
@@ -1038,25 +942,7 @@
                 { rank: "NR", name: "Park Hyun-sung", record: "10-0", photo: placeholderImg },
                 { rank: "NR", name: "Clayton Carpenter", record: "8-1", photo: placeholderImg },
                 { rank: "NR", name: "Jafel Filho", record: "16-4", photo: placeholderImg },
-                { rank: "NR", name: "Édgar Cháirez", record: "12-6", photo: placeholderImg },
-                { rank: "NR", name: "Azat Maksum", record: "17-2", photo: placeholderImg },
-                { rank: "NR", name: "Daniel Barez", record: "17-7", photo: placeholderImg },
-                { rank: "NR", name: "Felipe dos Santos", record: "8-3", photo: placeholderImg },
-                { rank: "NR", name: "Kevin Borjas", record: "10-3", photo: placeholderImg },
-                { rank: "NR", name: "Rafael Estevam", record: "13-0", photo: placeholderImg },
-                { rank: "NR", name: "Felipe Bunes", record: "14-7", photo: placeholderImg },
-                { rank: "NR", name: "Ronaldo Rodríguez", record: "18-3", photo: placeholderImg },
-                { rank: "NR", name: "André Lima", record: "11-0", photo: placeholderImg },
-                { rank: "NR", name: "Mitch Raposo", record: "9-2", photo: placeholderImg },
-                { rank: "NR", name: "Rei Tsuruya", record: "10-1", photo: placeholderImg },
-                { rank: "NR", name: "Stewart Nicoli", record: "8-1", photo: placeholderImg },
-                { rank: "NR", name: "Lucas Rocha", record: "17-2", photo: placeholderImg },
-                { rank: "NR", name: "Lone’er Kavanagh", record: "9-0", photo: placeholderImg },
-                { rank: "NR", name: "Jose Ochoa", record: "8-1", photo: placeholderImg },
-                { rank: "NR", name: "Nyamjargal Tumendenberel", record: "8-1", photo: placeholderImg },
-                { rank: "NR", name: "Kierandip Singh Sahota", record: "12-3", photo: placeholderImg },
-                { rank: "NR", name: "Choi Dong-Hun", record: "9-0", photo: placeholderImg },
-                { rank: "NR", name: "Luis Gurule", record: "10-1", photo: placeholderImg }
+                { rank: "NR", name: "Édgar Cháirez", record: "12-6", photo: placeholderImg }
             ],
             
             WBW: [
@@ -1076,7 +962,6 @@
                 { rank: "13", name: "Miesha Tate", record: "20-10", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3151986.png&w=350&h=254" },
                 { rank: "14", name: "Joselyne Edwards", record: "15-6", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4563664.png&w=350&h=254" },
                 { rank: "15", name: "Dariya Zheleznyakova", record: "10-2", photo: placeholderImg },
-                // Unranked fighters
                 { rank: "NR", name: "Priscila Cachoeira", record: "13-6", photo: placeholderImg },
                 { rank: "NR", name: "Melissa Gatto", record: "9-2-2", photo: placeholderImg },
                 { rank: "NR", name: "Josiane Nunes", record: "10-4", photo: placeholderImg },
@@ -1086,9 +971,7 @@
                 { rank: "NR", name: "Tainara Lisboa", record: "7-3", photo: placeholderImg },
                 { rank: "NR", name: "Luana Santos", record: "9-2", photo: placeholderImg },
                 { rank: "NR", name: "Montserrat Rendon", record: "6-1", photo: placeholderImg },
-                { rank: "NR", name: "Melissa Mullins", record: "7-2", photo: placeholderImg },
-                { rank: "NR", name: "Ravena Oliveira", record: "7-2-1", photo: placeholderImg },
-                { rank: "NR", name: "Klaudia Sygula", record: "7-2", photo: placeholderImg }
+                { rank: "NR", name: "Melissa Mullins", record: "7-2", photo: placeholderImg }
             ],
             
             WFLW: [
@@ -1108,7 +991,6 @@
                 { rank: "13", name: "Wang Cong", record: "8-1", photo: placeholderImg },
                 { rank: "14", name: "JJ Aldrich", record: "14-7", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3922319.png&w=350&h=254" },
                 { rank: "15", name: "Eduarda Moura", record: "12-1", photo: placeholderImg },
-                // Unranked fighters
                 { rank: "NR", name: "Maryna Moroz", record: "11-6", photo: placeholderImg },
                 { rank: "NR", name: "Katlyn Cerminara", record: "18-6", photo: placeholderImg },
                 { rank: "NR", name: "Veronica Hardy", record: "9-5-1", photo: placeholderImg },
@@ -1117,15 +999,7 @@
                 { rank: "NR", name: "Luana Carolina", record: "11-4", photo: placeholderImg },
                 { rank: "NR", name: "Juliana Miller", record: "4-3", photo: placeholderImg },
                 { rank: "NR", name: "Tereza Bledá", record: "7-1", photo: placeholderImg },
-                { rank: "NR", name: "Gabriella Fernandes", record: "10-3", photo: placeholderImg },
-                { rank: "NR", name: "Brogan Walker", record: "7-4", photo: placeholderImg },
-                { rank: "NR", name: "Bruna Brasil", record: "10-5-1", photo: placeholderImg },
-                { rank: "NR", name: "Jamey-Lyn Horth", record: "9-2", photo: placeholderImg },
-                { rank: "NR", name: "Dione Barbosa", record: "8-3", photo: placeholderImg },
-                { rank: "NR", name: "Ernesta Kareckaite", record: "6-1-1", photo: placeholderImg },
-                { rank: "NR", name: "Carli Judice", record: "4-2", photo: placeholderImg },
-                { rank: "NR", name: "Nicolle Caliari", record: "8-3", photo: placeholderImg },
-                { rank: "NR", name: "Yuneisy Duben", record: "6-1 (1 NC)", photo: placeholderImg }
+                { rank: "NR", name: "Gabriella Fernandes", record: "10-3", photo: placeholderImg }
             ],
             
             WSW: [
@@ -1145,7 +1019,6 @@
                 { rank: "13", name: "Tecia Pennington", record: "15-7", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3151992.png&w=350&h=254" },
                 { rank: "14", name: "Loma Lookboonmee", record: "10-3", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/3922311.png&w=350&h=254" },
                 { rank: "15", name: "Denise Gomes", record: "11-3", photo: "https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4877951.png&w=350&h=254" },
-                // Unranked fighters
                 { rank: "NR", name: "Karolina Kowalkiewicz", record: "17-8", photo: placeholderImg },
                 { rank: "NR", name: "Polyana Viana", record: "13-8", photo: placeholderImg },
                 { rank: "NR", name: "Mizuki Inoue", record: "15-6", photo: placeholderImg },
@@ -1154,23 +1027,7 @@
                 { rank: "NR", name: "Montserrat Ruiz", record: "10-4", photo: placeholderImg },
                 { rank: "NR", name: "Luana Pinheiro", record: "11-5", photo: placeholderImg },
                 { rank: "NR", name: "Elise Reed", record: "8-5", photo: placeholderImg },
-                { rank: "NR", name: "Vanessa Demopoulos", record: "11-8", photo: placeholderImg },
-                { rank: "NR", name: "Piera Rodriguez", record: "10-2", photo: placeholderImg },
-                { rank: "NR", name: "Yazmin Jauregui", record: "11-2", photo: placeholderImg },
-                { rank: "NR", name: "Melissa Martinez", record: "8-1", photo: placeholderImg },
-                { rank: "NR", name: "Jaqueline Amorim", record: "10-1", photo: placeholderImg },
-                { rank: "NR", name: "Ketlen Souza", record: "15-5", photo: placeholderImg },
-                { rank: "NR", name: "Shauna Bannon", record: "7-1", photo: placeholderImg },
-                { rank: "NR", name: "Marnic Mann", record: "6-3", photo: placeholderImg },
-                { rank: "NR", name: "Talita Alencar", record: "6-1-1", photo: placeholderImg },
-                { rank: "NR", name: "Rayanne dos Santos", record: "14-8", photo: placeholderImg },
-                { rank: "NR", name: "Puja Tomar", record: "9-5", photo: placeholderImg },
-                { rank: "NR", name: "Julia Polastri", record: "13-4", photo: placeholderImg },
-                { rank: "NR", name: "Fatima Kline", record: "7-1", photo: placeholderImg },
-                { rank: "NR", name: "Alice Ardelean", record: "10-7", photo: placeholderImg },
-                { rank: "NR", name: "Stephanie Luciano", record: "6-2-1", photo: placeholderImg },
-                { rank: "NR", name: "Shi Ming", record: "17-5", photo: placeholderImg },
-                { rank: "NR", name: "Alexia Thainara", record: "12-1", photo: placeholderImg }
+                { rank: "NR", name: "Vanessa Demopoulos", record: "11-8", photo: placeholderImg }
             ]
         };
         
@@ -1196,6 +1053,11 @@
             document.getElementById('event-location').addEventListener('input', updateEventDetails);
             document.getElementById('event-date').addEventListener('change', updateEventDetails);
             document.getElementById('event-time').addEventListener('change', updateEventDetails);
+            
+            // Export functionality
+            document.getElementById('export-btn').addEventListener('click', exportEventPoster);
+            document.getElementById('cancel-export').addEventListener('click', closeExportOverlay);
+            document.getElementById('download-btn').addEventListener('click', downloadPoster);
         });
         
         // Populate divisions dropdown
@@ -1373,6 +1235,59 @@
                 icon.classList.remove('fa-sun');
                 icon.classList.add('fa-moon');
             }
+        }
+        
+        // Export event poster as image
+        function exportEventPoster() {
+            const poster = document.getElementById('event-poster');
+            const overlay = document.getElementById('export-overlay');
+            const preview = document.getElementById('export-preview');
+            
+            // Show loading indicator
+            preview.src = '';
+            preview.alt = 'Loading preview...';
+            overlay.classList.add('active');
+            
+            // Use html2canvas to capture the poster
+            html2canvas(poster, {
+                scale: 2,
+                backgroundColor: document.body.classList.contains('light-mode') ? '#f0f2f5' : '#0c0e13'
+            }).then(canvas => {
+                // Update preview image
+                preview.src = canvas.toDataURL('image/png');
+                preview.alt = 'Event Poster Preview';
+            }).catch(error => {
+                console.error('Error generating poster:', error);
+                alert('Error generating poster. Please try again.');
+                overlay.classList.remove('active');
+            });
+        }
+        
+        // Close export overlay
+        function closeExportOverlay() {
+            document.getElementById('export-overlay').classList.remove('active');
+        }
+        
+        // Download the poster image
+        function downloadPoster() {
+            const preview = document.getElementById('export-preview');
+            const eventName = document.getElementById('event-name').value || 'UFC_Event';
+            
+            if (!preview.src) {
+                alert('Poster image not ready yet. Please try again.');
+                return;
+            }
+            
+            // Create a temporary link to trigger download
+            const link = document.createElement('a');
+            link.href = preview.src;
+            link.download = `${eventName.replace(/\s+/g, '_')}_Poster.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Close the overlay after download
+            closeExportOverlay();
         }
     </script>
 </body>
