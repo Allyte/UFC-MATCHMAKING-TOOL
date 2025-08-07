@@ -242,6 +242,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 10px 0;
         }
         
         .fighter {
@@ -273,6 +274,9 @@
             font-size: 1.25rem;
             font-weight: 700;
             margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
         .rank-tag {
@@ -289,11 +293,26 @@
             color: #aaa;
         }
         
+        .vs-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+        }
+        
         .vs {
             font-size: 1.8rem;
             font-weight: 800;
             color: #f44;
-            padding: 0 20px;
+            padding: 10px 0;
+        }
+        
+        .vs-text {
+            font-size: 0.9rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
         .delete-btn {
@@ -502,8 +521,8 @@
             }
             
             .vs {
-                padding: 20px 0;
-                transform: rotate(90deg);
+                padding: 10px 0;
+                font-size: 1.5rem;
             }
             
             .header h1 {
@@ -522,6 +541,10 @@
                 width: 45px;
                 height: 45px;
                 font-size: 1.4rem;
+            }
+            
+            .fighter {
+                padding: 10px;
             }
         }
     </style>
@@ -683,7 +706,7 @@
             WSW: "Women's Strawweight (115 lb)"
         };
         
-        const roster = {
+ const roster = {
             HW: [
                 { rank: "C", name: "Tom Aspinall", record: "15-3", photo: "https://a.espncdn.com/i/headshots/mma/players/full/4010976.png" },
                 { rank: "1", name: "Ciryl Gane", record: "13-2", photo: "https://a.espncdn.com/i/headshots/mma/players/full/4426000.png" },
@@ -1335,6 +1358,9 @@
             ]
         };
         
+        // Store canvas data for download
+        let posterCanvasData = null;
+        
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function() {
             populateDivisions();
@@ -1449,7 +1475,7 @@
             const fighter1 = fighters.find(f => f.name === fighter1Select.value);
             const fighter2 = fighters.find(f => f.name === fighter2Select.value);
             
-            // Create fight card HTML
+            // Create fight card HTML with improved VS layout
             const fightCard = document.createElement('div');
             fightCard.className = 'fight-card';
             fightCard.innerHTML = `
@@ -1461,7 +1487,12 @@
                         <div class="fighter-name">${fighter1Name} <span class="rank-tag">${fighter1 ? fighter1.rank : 'NR'}</span></div>
                         <div class="fighter-details">${record1 || (fighter1 ? fighter1.record : '')}</div>
                     </div>
-                    <div class="vs">VS</div>
+                    
+                    <div class="vs-container">
+                        <div class="vs">VS</div>
+                        <div class="vs-text">Bout</div>
+                    </div>
+                    
                     <div class="fighter">
                         <div class="fighter-photo"><img src="${fighter2 ? fighter2.photo || placeholderImg : placeholderImg}" alt="${fighter2Name}" onerror="this.src='${placeholderImg}'"></div>
                         <div class="fighter-name">${fighter2Name} <span class="rank-tag">${fighter2 ? fighter2.rank : 'NR'}</span></div>
@@ -1565,14 +1596,21 @@
             
             // Show loading indicator
             preview.src = '';
-            preview.alt = 'Loading preview...';
+            preview.alt = 'Generating preview...';
             overlay.classList.add('active');
+            
+            // Reset previous canvas data
+            posterCanvasData = null;
             
             // Use html2canvas to capture the poster
             html2canvas(poster, {
                 scale: 2,
-                backgroundColor: document.body.classList.contains('light-mode') ? '#f0f2f5' : '#0c0e13'
+                backgroundColor: document.body.classList.contains('light-mode') ? '#f0f2f5' : '#0c0e13',
+                useCORS: true
             }).then(canvas => {
+                // Store canvas data for download
+                posterCanvasData = canvas;
+                
                 // Update preview image
                 preview.src = canvas.toDataURL('image/png');
                 preview.alt = 'Event Poster Preview';
@@ -1590,26 +1628,21 @@
         
         // Download the poster image
         function downloadPoster() {
-            const preview = document.getElementById('export-preview');
-            const eventName = document.getElementById('event-name').value || 'UFC_Event';
-            
-            if (!preview.src) {
+            if (!posterCanvasData) {
                 alert('Poster image not ready yet. Please try again.');
                 return;
             }
             
+            const eventName = document.getElementById('event-name').value || 'UFC_Event';
+            
             // Create a temporary link to trigger download
             const link = document.createElement('a');
-            link.href = preview.src;
+            link.href = posterCanvasData.toDataURL('image/png');
             link.download = `${eventName.replace(/\s+/g, '_')}_Poster.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
-            // Close the overlay after download
-            closeExportOverlay();
         }
     </script>
 </body>
 </html>
-
