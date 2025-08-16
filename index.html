@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UFC Matchmaking Tool</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@400;600;700&family=Bebas+Neue&family=Anton&family=Orbitron:wght@400;600;800&family=Black+Ops+One&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
@@ -895,6 +896,149 @@
   text-transform: uppercase;
 }
 
+
+/* === Injected: Font stacks & rank styles === */
+:root{
+  --font-body: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-display: 'Bebas Neue', 'Anton', Impact, sans-serif;
+  --font-fighter: 'Oswald', 'Inter', system-ui, sans-serif;
+}
+body{ font-family: var(--font-body); }
+.header h1, .event-title{ font-family: var(--font-display); letter-spacing:.02em; }
+.fighter-name{ font-family: var(--font-fighter); }
+.rank-tag.bmf{ background:#ffffff; color:#000; border:1px solid #999; }
+.rank-tag.ic{ background:#111; border:1px solid #aaa; color:#fff; }
+
+
+/* === Injected: Global Akzidenz-Grotesk stack and theme font overrides === */
+:root{
+  --font-body: 'Akzidenz-Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display: 'Bebas Neue', 'Anton', Impact, sans-serif;
+  --font-fighter: 'Oswald', 'Inter', system-ui, sans-serif;
+  --font-neon: 'Orbitron', 'Akzidenz-Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --font-bmf: 'Black Ops One', Impact, 'Akzidenz-Grotesk', Arial, sans-serif;
+}
+body{ font-family: var(--font-body) !important; }
+.header h1, .event-title{ font-family: var(--font-display); }
+.fighter-name{ font-family: var(--font-fighter); }
+/* Theme-specific font overrides */
+.poster-theme-neon .event-title,
+.poster-theme-neon .fighter-name,
+.poster-theme-neon .rank-tag{ font-family: var(--font-neon) !important; letter-spacing:.04em; }
+.poster-theme-bmf .event-title,
+.poster-theme-bmf .fighter-name,
+.poster-theme-bmf .rank-tag{ font-family: var(--font-bmf) !important; letter-spacing:.02em; }
+/* Paramount+ theme fonts use Akzidenz stack (already global) */
+
+
+/* === Injected: Paramount+ Poster Theme === */
+.poster-theme-paramount {
+  --poster-bg:
+    radial-gradient(900px 520px at 0% 0%, rgba(255, 215, 0, .10), transparent 60%),
+    radial-gradient(900px 520px at 100% 100%, rgba(0, 87, 184, .18), transparent 60%),
+    linear-gradient(165deg, #004aad 0%, #0057B8 55%, #003f80 100%);
+  --poster-border: #FFD700; /* Gold border */
+  --poster-glow: rgba(255, 215, 0, .28); /* Gold glow */
+  --poster-accent: #FFD700; /* Gold accent */
+}
+.poster-theme-paramount .event-title { 
+  color: #ffffff; 
+  text-shadow: 0 4px 18px rgba(255,215,0,.35), 0 0 24px rgba(0,87,184,.25);
+}
+.poster-theme-paramount .event-type-display { color: #FFD700; font-weight:700; }
+.poster-theme-paramount .event-poster-stripe { background: #FFD700; } /* Gold stripe */
+
+.poster-theme-paramount .event-title { 
+  color: #ffffff; 
+  text-shadow: 0 4px 18px rgba(0,118,210,.35), 0 0 24px rgba(0,87,184,.25);
+}
+.poster-theme-paramount .event-type-display { color: #cfeaff; }
+.poster-theme-paramount .event-poster-stripe { background: #0057B8; } /* Paramount+ deep blue */
+
+
+/* === Injected: High-specificity theme fixes for headings & creator UI === */
+.event-poster .card-section h3,
+.card-builder h2,
+.instructions h3{
+  color: var(--site-accent) !important;
+}
+
+/* Ensure fight tier labels (MAIN EVENT / CO-MAIN, etc.) track theme */
+.fight-card .fight-tier{
+  color: var(--site-accent-2) !important;
+  text-shadow: 0 0 10px color-mix(in oklab, var(--site-accent-2) 30%, transparent);
+}
+
+/* Creator panel subtexts */
+.card-builder .division-name,
+.card-builder .fighter-details{
+  color: var(--site-muted) !important;
+}
+
+/* Creator panel section borders */
+.card-builder, .instructions{
+  border-color: var(--site-border) !important;
+}
+
+/* Creator panel "Add Fight" button already themed; ensure all buttons follow accent */
+.round-btn{
+  background: color-mix(in oklab, var(--site-card) 88%, #000 12%) !important;
+  color: var(--site-text) !important;
+  border: 1px solid var(--site-border) !important;
+}
+.round-btn.active{
+  background: var(--site-accent) !important;
+  color: #000 !important;
+  border-color: color-mix(in oklab, var(--site-accent) 60%, #000 40%) !important;
+}
+
+/* File upload chip and filenames */
+.file-upload label{
+  background: color-mix(in oklab, var(--site-card) 88%, #000 12%) !important;
+  border: 1px solid var(--site-border) !important;
+  color: var(--site-text) !important;
+}
+.file-name{ color: var(--site-muted) !important; }
+
+/* Poster area subtle glow in accent */
+.event-poster{ box-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.02) inset, 0 0 40px color-mix(in oklab, var(--site-accent) 18%, transparent) !important; }
+
+
+/* === Injected: Force uppercase for key UI text === */
+.event-poster .card-section h3,
+.card-builder h2,
+.instructions h3,
+.fight-card .fight-tier,
+.round-btn,
+.file-upload label,
+#poster-theme-controls .theme-preset {
+  text-transform: uppercase !important;
+}
+
+
+/* === Injected: Force uppercase across titles, names, tags, and labels (all themes) === */
+.event-title,
+.event-type-display,
+.fighter-name,
+.rank-tag,
+.division-name {
+  text-transform: uppercase !important;
+}
+
+/* Extra specificity for NEON & BMF to win any theme-specific overrides */
+.poster-theme-neon .event-title,
+.poster-theme-neon .event-type-display,
+.poster-theme-neon .fighter-name,
+.poster-theme-neon .rank-tag,
+.poster-theme-neon .division-name,
+.poster-theme-bmf .event-title,
+.poster-theme-bmf .event-type-display,
+.poster-theme-bmf .fighter-name,
+.poster-theme-bmf .rank-tag,
+.poster-theme-bmf .division-name {
+  text-transform: uppercase !important;
+}
+
 </style>
 </head>
 <body>
@@ -1038,6 +1182,8 @@
 
   <button class="theme-preset" data-poster-theme="bmf" title="BMF (Max)"
           style="width:auto;padding:6px 10px;border-radius:8px;background:linear-gradient(180deg,#0a0a0a,#1a1a1a);border:2px solid #777;color:#fff;font-weight:700;">BMF</button>
+  <button class="theme-preset" data-poster-theme="default" title="Default" style="width:auto;padding:6px 10px;border-radius:8px;background:#222;border:2px solid #555;color:#ddd;font-weight:700;">Default</button>
+  <button class="theme-preset" data-poster-theme="paramount" title="Paramount+" style="width:auto;padding:6px 10px;border-radius:8px;background:linear-gradient(160deg,#0057B8,#003f80);border:2px solid #FFD700;color:#fff;font-weight:700;">Paramount+</button>
 </div>
 
                     <h3>Theme Customization</h3>
@@ -2463,5 +2609,145 @@
 })();
 
 </script>
+
+<!-- Injected patches: theme reset & BMF rank handling -->
+<script>
+(function(){
+  const poster = document.getElementById('event-poster');
+  const btnRow = document.getElementById('poster-theme-controls');
+  const THEME_PREFIX = 'poster-theme-';
+
+// Injected: sync site theme (body class) with poster theme
+const BODY_PREFIX = 'theme-';
+function clearBodyThemes(){
+  document.body.className = document.body.className
+    .split(/\s+/)
+    .filter(c => !c.startsWith(BODY_PREFIX))
+    .join(' ');
+}
+function setSiteTheme(key){
+  clearBodyThemes();
+  if (key && key !== 'default'){
+    document.body.classList.add(BODY_PREFIX + key);
+  } else {
+    document.body.classList.add(BODY_PREFIX + 'default');
+  }
+}
+
+  function clearPosterThemes(){
+    poster.className = poster.className
+      .split(/\s+/)
+      .filter(c => !c.startsWith(THEME_PREFIX))
+      .join(' ');
+  }
+  function setPosterTheme(key){
+    clearPosterThemes();
+    if (key && key !== 'default'){
+      poster.classList.add(THEME_PREFIX + key, 'thematic');
+    } else {
+      poster.classList.remove('thematic');
+    }
+    setSiteTheme(key);
+  } else {
+      poster.classList.remove('thematic');
+    }
+  }
+  if(btnRow){
+    btnRow.addEventListener('click', (e) => {
+      const b = e.target.closest('.theme-preset');
+      if(!b) return;
+      setPosterTheme(b.dataset.posterTheme);
+      // visual active state
+      btnRow.querySelectorAll('.theme-preset').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    }, true);
+  }
+
+  // --- BMF rank tag handling ---
+  function normalizeRankText(t){
+    return (t||'').trim().toUpperCase();
+  }
+  function decorateRankTags(scope=document){
+    const tags = scope.querySelectorAll('.rank-tag');
+    tags.forEach(tag => {
+      const t = normalizeRankText(tag.textContent);
+      if (t === 'BMF') tag.classList.add('bmf');
+      if (t === 'IC') tag.classList.add('ic');
+    });
+  }
+
+  // Try to hook addFight if it exists so we decorate after each add
+  const prevAdd = window.addFight;
+  if (typeof prevAdd === 'function'){
+    window.addFight = function(){
+      const out = prevAdd.apply(this, arguments);
+      // Give the DOM a tick to render, then decorate
+      requestAnimationFrame(() => decorateRankTags());
+      return out;
+    };
+  }
+
+  // Also decorate on initial load and after reordering
+  decorateRankTags();
+  document.addEventListener('DOMContentLoaded', decorateRankTags);
+
+  // When fights are reordered (Sortable), a mutation observer will redecorate
+  const observer = new MutationObserver(() => decorateRankTags());
+  observer.observe(document.body, { childList:true, subtree:true });
+})();
+</script>
+
+
+<!-- Injected: robust poster/site theme switcher -->
+<script>
+(function(){
+  const THEME_PREFIX = 'poster-theme-';
+  const BODY_PREFIX = 'theme-';
+  function clearPosterThemes(el){
+    el.className = el.className.split(/\s+/).filter(c => !c.startsWith(THEME_PREFIX)).join(' ');
+  }
+  function clearBodyThemes(){
+    document.body.className = document.body.className.split(/\s+/).filter(c => !c.startsWith(BODY_PREFIX)).join(' ');
+  }
+  function setSiteTheme(key){
+    clearBodyThemes();
+    document.body.classList.add(BODY_PREFIX + (key && key !== 'default' ? key : 'default'));
+  }
+  window.applyPosterTheme = function(key){
+    const poster = document.getElementById('event-poster');
+    if(!poster) return;
+    clearPosterThemes(poster);
+    if (key && key !== 'default'){
+      poster.classList.add(THEME_PREFIX + key, 'thematic');
+    } else {
+      poster.classList.remove('thematic');
+    }
+    setSiteTheme(key);
+  };
+
+  function bindButtons(){
+    document.querySelectorAll('#poster-theme-controls .theme-preset[data-poster-theme]').forEach(btn => {
+      btn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const key = btn.getAttribute('data-poster-theme');
+        window.applyPosterTheme(key);
+        // active state
+        document.querySelectorAll('#poster-theme-controls .theme-preset').forEach(x=>x.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bindButtons);
+  } else {
+    bindButtons();
+  }
+
+  // Initialize to default once
+  window.applyPosterTheme('default');
+})();
+</script>
+
 </body>
 </html>
