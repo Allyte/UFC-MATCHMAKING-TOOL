@@ -740,7 +740,140 @@
                 max-width: 100px;
             }
         }
-    </style>
+    
+/* --- Poster Themes (injected) --- */
+.event-poster {
+  --poster-bg: radial-gradient(1200px 600px at 100% 100%, rgba(255,255,255,.06), rgba(0,0,0,0) 50%),
+               linear-gradient(135deg, rgba(255,255,255,.04), rgba(0,0,0,0));
+  --poster-border: #444;
+  --poster-glow: rgba(209,10,17,.25);
+  --poster-accent: #d10a11;
+  background-image: var(--poster-bg);
+  border-color: var(--poster-border);
+  box-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.02) inset;
+}
+.event-poster.thematic { position: relative; overflow: hidden; }
+.event-poster.thematic::after {
+  content: ""; position: absolute; inset: 0;
+  pointer-events: none; box-shadow: inset 0 0 200px rgba(0,0,0,.35);
+}
+.poster-theme-ppv {
+  --poster-bg:
+    radial-gradient(900px 500px at 10% -10%, rgba(247,201,72,.18), rgba(0,0,0,0) 50%),
+    radial-gradient(1200px 700px at 100% 120%, rgba(247,201,72,.10), rgba(0,0,0,0) 60%),
+    linear-gradient(160deg, #1a1610, #262018 55%, #1a1610);
+  --poster-border: #7b5c22;
+  --poster-glow: rgba(247,201,72,.3);
+  --poster-accent: #f7c948;
+}
+.poster-theme-ppv .event-title { color: #fff; text-shadow: 0 6px 24px rgba(247,201,72,.25); }
+.poster-theme-ppv .event-type-display { color: #f7c948; }
+.poster-theme-espn {
+  --poster-bg:
+    linear-gradient(180deg, #0b0f16 0%, #0f1520 40%, #0b0f16 100%),
+    linear-gradient(90deg, rgba(255,255,255,.03) 0 100%);
+  --poster-border: #2b3444;
+  --poster-glow: rgba(255,255,255,.12);
+  --poster-accent: #e11d2e;
+}
+.poster-theme-espn .event-poster-stripe { background: #e11d2e; }
+.poster-theme-abc {
+  --poster-bg:
+    radial-gradient(1000px 520px at 0% 100%, rgba(255,255,255,.06), rgba(0,0,0,0)),
+    linear-gradient(145deg, #0a0a0a, #161616 60%, #0f0f0f);
+  --poster-border: #3a3a3a;
+  --poster-glow: rgba(255,255,255,.16);
+  --poster-accent: #ffffff;
+}
+.poster-theme-abc .event-title { color: #ffffff; }
+.poster-theme-abc .event-type-display { color: #ffffff; opacity: .9; }
+.poster-theme-fn {
+  --poster-bg:
+    linear-gradient(180deg, #14171c 0%, #0f1116 100%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 2px, transparent 2px 4px);
+  --poster-border: #2a2f38;
+  --poster-glow: rgba(0,0,0,.2);
+  --poster-accent: #f44;
+}
+.poster-theme-fn .event-title { letter-spacing: .02em; }
+.poster-theme-fn .event-type-display { color: #f44; }
+.event-poster .event-poster-accent {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(400px 220px at 90% 10%, var(--poster-glow), transparent 70%),
+    radial-gradient(300px 180px at 10% 90%, var(--poster-glow), transparent 70%);
+  opacity: .6;
+}
+.event-poster .event-poster-stripe {
+  position: absolute; top: 0; left: 0; right: 0; height: 8px; z-index: 2;
+}
+
+
+/* === Poster Themes (revised) === */
+/* Base poster variables already defined earlier; themes override them */
+
+.poster-theme-ppv {
+  /* Gold / Black / White */
+  --poster-bg:
+    radial-gradient(900px 500px at 10% -10%, rgba(247,201,72,.18), rgba(0,0,0,0) 50%),
+    radial-gradient(1200px 700px at 100% 120%, rgba(247,201,72,.10), rgba(0,0,0,0) 60%),
+    linear-gradient(160deg, #0c0c0c, #161513 55%, #0b0b0b);
+  --poster-border: #7b5c22;
+  --poster-glow: rgba(247,201,72,.32);
+  --poster-accent: #f7c948;
+}
+.poster-theme-ppv .event-title { color: #ffffff; text-shadow: 0 6px 24px rgba(247,201,72,.28); }
+.poster-theme-ppv .event-type-display { color: #ffffff; opacity: .92; }
+
+.poster-theme-espn {
+  --poster-bg:
+    linear-gradient(180deg, #0b0f16 0%, #0f1520 40%, #0b0f16 100%),
+    linear-gradient(90deg, rgba(255,255,255,.03) 0 100%);
+  --poster-border: #2b3444;
+  --poster-glow: rgba(255,255,255,.12);
+  --poster-accent: #e11d2e;
+}
+.poster-theme-espn .event-poster-stripe { background: #e11d2e; }
+.poster-theme-espn .event-title { color: #ffffff; }
+
+.poster-theme-fn {
+  --poster-bg:
+    linear-gradient(180deg, #14171c 0%, #0f1116 100%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 2px, transparent 2px 4px);
+  --poster-border: #2a2f38;
+  --poster-glow: rgba(0,0,0,.2);
+  --poster-accent: #f44;
+}
+.poster-theme-fn .event-title { letter-spacing: .02em; color:#fff; }
+.poster-theme-fn .event-type-display { color: #f44; }
+
+/* NEW: UFC broadcast (Red #D20A0A & White) */
+.poster-theme-ufc {
+  --poster-bg:
+    linear-gradient(180deg, #0f0f0f 0%, #141414 60%, #0b0b0b 100%),
+    radial-gradient(800px 420px at 100% 0%, rgba(210,10,10,.18), transparent 70%);
+  --poster-border: #3a2a2a;
+  --poster-glow: rgba(210,10,10,.28);
+  --poster-accent: #D20A0A;
+}
+.poster-theme-ufc .event-poster-stripe { background: #D20A0A; }
+.poster-theme-ufc .event-title { color: #ffffff; text-shadow: 0 3px 14px rgba(210,10,10,.25); }
+.poster-theme-ufc .event-type-display { color: #ffffff; }
+
+/* NEW: Neon (Purple & Pink) */
+.poster-theme-neon {
+  --poster-bg:
+    radial-gradient(900px 520px at 0% 0%, rgba(206, 0, 255, .22), transparent 60%),
+    radial-gradient(900px 520px at 100% 100%, rgba(255, 20, 147, .18), transparent 60%),
+    linear-gradient(160deg, #0b0b12, #11111a 60%, #0a0a12);
+  --poster-border: #3a2f44;
+  --poster-glow: rgba(206,0,255,.28);
+  --poster-accent: #ff1493;
+}
+.poster-theme-neon .event-title { color: #ffffff; text-shadow: 0 4px 18px rgba(206,0,255,.35), 0 0 24px rgba(255,20,147,.25); }
+.poster-theme-neon .event-type-display { color: #ff7ccf; }
+
+</style>
 </head>
 <body>
     <div class="container">
@@ -867,6 +1000,21 @@
                 </div>
                 
                 <div class="theme-customizer">
+
+<div class="theme-presets" id="poster-theme-controls" style="margin-top:14px;">
+  <span style="align-self:center;font-weight:700;margin-right:6px;">Poster:</span>
+  <button class="theme-preset" data-poster-theme="ppv" title="PPV Gold"
+          style="width:auto;padding:6px 10px;border-radius:8px;background:linear-gradient(135deg,#0c0c0c,#161513);border:2px solid #7b5c22;color:#f7c948;font-weight:700;">PPV</button>
+  <button class="theme-preset" data-poster-theme="espn" title="ESPN"
+          style="width:auto;padding:6px 10px;border-radius:8px;background:linear-gradient(180deg,#0b0f16,#0f1520);border:2px solid #2b3444;color:#e11d2e;font-weight:700;">ESPN</button>
+  <button class="theme-preset" data-poster-theme="fn" title="Fight Night Minimal"
+          style="width:auto;padding:6px 10px;border-radius:8px;background:linear-gradient(180deg,#14171c,#0f1116);border:2px solid #2a2f38;color:#f44;font-weight:700;">FN</button>
+  <button class="theme-preset" data-poster-theme="ufc" title="UFC (Red & White)"
+          style="width:auto;padding:6px 10px;border-radius:8px;background:linear-gradient(180deg,#0f0f0f,#171717);border:2px solid #6a1a1a;color:#fff;font-weight:700;">UFC</button>
+  <button class="theme-preset" data-poster-theme="neon" title="Neon (Purple & Pink)"
+          style="width:auto;padding:6px 10px;border-radius:8px;background:linear-gradient(135deg,#1a0f2a,#1a0f1f);border:2px solid #4b2a5a;color:#ff7ccf;font-weight:700;">Neon</button>
+</div>
+
                     <h3>Theme Customization</h3>
                     <div class="color-picker">
                         <span>Background:</span>
@@ -908,6 +1056,10 @@
             </div>
             
             <div class="event-poster" id="event-poster">
+
+<div class="event-poster-stripe" aria-hidden="true"></div>
+<div class="event-poster-accent" aria-hidden="true"></div>
+
                 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/UFC_Logo.svg/1200px-UFC_Logo.svg.png" 
                      alt="UFC Logo" class="poster-ufc-logo">
                 
@@ -2248,6 +2400,44 @@
             link.click();
             document.body.removeChild(link);
         }
-    </script>
+    
+(function initPosterThemes(){
+  const poster = document.getElementById('event-poster');
+  const controls = document.getElementById('poster-theme-controls');
+  if (!poster || !controls) return;
+  let currentPosterTheme = localStorage.getItem('posterTheme') || 'ppv';
+
+  function setPosterTheme(theme){
+    poster.classList.remove('poster-theme-ppv','poster-theme-espn','poster-theme-abc','poster-theme-fn','poster-theme-ufc','poster-theme-neon');
+    poster.classList.add('thematic');
+    const map = { ppv:'poster-theme-ppv', espn:'poster-theme-espn', abc:'poster-theme-abc', fn:'poster-theme-fn', ufc:'poster-theme-ufc', neon:'poster-theme-neon' };
+    poster.classList.add(map[theme] || map.ppv);
+
+    // ESPN/UFC stripe intensity
+    const stripe = poster.querySelector('.event-poster-stripe');
+    if (stripe) {
+      stripe.style.opacity = (map[theme] === 'poster-theme-espn' || map[theme] === 'poster-theme-ufc') ? '1' : '0.2';
+    }
+
+    currentPosterTheme = theme;
+    localStorage.setItem('posterTheme', theme);
+
+    [...controls.querySelectorAll('[data-poster-theme]')].forEach(btn=>{
+      const active = btn.getAttribute('data-poster-theme')===theme;
+      btn.classList.toggle('active', active);
+      btn.style.borderColor = active ? '#fff' : 'transparent';
+    });
+  }
+
+  controls.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-poster-theme]');
+    if (!btn) return;
+    setPosterTheme(btn.getAttribute('data-poster-theme'));
+  });
+
+  setPosterTheme(currentPosterTheme);
+})();
+
+</script>
 </body>
 </html>
